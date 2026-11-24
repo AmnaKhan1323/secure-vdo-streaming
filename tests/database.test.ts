@@ -61,7 +61,7 @@ test("Real PostgreSQL/WASM migration, minimal seed, and historical data preserva
     await prisma.enrollment.create({ data: { userId: "preserved-user", courseId: legacyCourse.id } });
     const savedProgress = await prisma.lessonProgress.create({ data: { userId: "preserved-user", lessonId: legacyLesson.id, percent: 96, completed: true, positionSeconds: 116, durationSeconds: 120 } });
     const savedMapping = await prisma.lessonVideo.create({ data: { lessonId: legacyLesson.id, provider: "GUMLET", assetId: "6192269e0822a81d955d1a4b" } });
-    const savedSetting = await prisma.providerSetting.update({ where: { provider: "GUMLET" }, data: { enabled: true, ttlSeconds: 120, allowedDomains: ["www.codewithharry.com"] } });
+    const savedSetting = await prisma.providerSetting.update({ where: { provider: "GUMLET" }, data: { enabled: true, ttlSeconds: 120, allowedDomains: ["www.vdo-platform.example.com"] } });
     // Operator-owned edits to an already-present new sample are also preserved.
     await prisma.course.update({ where: { id: testCourses[0].id }, data: { title: "Operator-owned test course" } });
     await seed(prisma);

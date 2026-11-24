@@ -2,9 +2,9 @@
 
 A small **Next.js** app to test the same course video on **Gumlet and Bunny Stream**, with login, enrollment checks, and short-lived playback links.
 
-[Start](#start) · [Test a video](#test-a-codewithharry-video) · [Still needed](#still-needed) · [Full guide](docs/setup.md) · [Test results](docs/verification.md)
+[Start](#start) · [Test a video](#test-a-vdo-platform-video) · [Still needed](#still-needed) · [Full guide](docs/setup.md) · [Test results](docs/verification.md)
 
-> **Prototype ready. Real CodeWithHarry playback is not yet verified.** Live testing needs your provider keys and an authorized video. A course/YouTube link is not a provider video ID.
+> **Prototype ready. Real vdo platform playback is not yet verified.** Live testing needs your provider keys and an authorized video. A course/YouTube link is not a provider video ID.
 
 ## Start
 
@@ -18,9 +18,9 @@ npm.cmd run dev:local
 
 Open **[localhost:3000/signup](http://localhost:3000/signup)**. No Docker needed. On macOS/Linux, use `npm` instead of `npm.cmd`.
 
-## Test a CodeWithHarry video
+## Test a vdo platform video
 
-1. Get a video you have **permission to upload/use**—see [CodeWithHarry's terms](https://www.codewithharry.com/terms).
+1. Get a vdo platform video you have **permission to upload/use**. Viewing access alone does not permit rehosting.
 2. **Sign up** (12-character minimum password), then enable admin access below.
 3. **Add both providers' private keys** using the instructions below; restart the app.
 4. Upload the **same authorized file** to both provider consoles (or use existing authorized assets); wait for processing.
@@ -70,8 +70,8 @@ Live checks **skip** without keys/videos; they are not playback proof. Use the a
 
 ## Still needed
 
-- [ ] Your provider accounts/keys and the same **authorized CodeWithHarry video** on both providers; usage may cost money.
+- [ ] Your provider accounts/keys and the same **authorized vdo platform video** on both providers; usage may cost money.
 - [ ] Real-browser playback, expired/tampered-token, wrong-domain, and unsigned manifest/segment checks.
 - [ ] For production: authorized website login/entitlement integration, HTTPS, native PostgreSQL, and operational safeguards—see [the guide](docs/setup.md).
 
-**No official CodeWithHarry account/media integration, fake streams, or DRM.** Existing data is preserved. GitHub upload is not deployment or live verification. [CI](https://github.com/AmnaKhan1323/secure-vdo-streaming/actions)
+**No existing vdo platform account/media integration, fake streams, or DRM.** Existing data is preserved. GitHub upload is not deployment or live verification. [CI](https://github.com/AmnaKhan1323/secure-vdo-streaming/actions)

@@ -10,7 +10,7 @@ export function AuthFrame({ children }: { children: React.ReactNode }) {
         <Brand />
         <div className="relative mx-auto max-w-md py-12">
           <p className="eyebrow mb-5 text-violet-300">
-            Secure course streaming for {SITE.domain}
+            Secure course streaming for the {SITE.targetName}
           </p>
           <h2 className="text-5xl font-semibold leading-[1.15] tracking-tight">
             One test lesson.
@@ -74,7 +74,7 @@ export function AuthFrame({ children }: { children: React.ReactNode }) {
         </div>
         <div className="m-auto w-full max-w-sm py-14">{children}</div>
         <p className="text-center text-[10px] text-[#737c93]">
-          {SITE.name} · {SITE.prototypeLabel} for {SITE.domain}
+          {SITE.name} · {SITE.prototypeLabel} for the {SITE.targetName}
         </p>
       </main>
     </div>

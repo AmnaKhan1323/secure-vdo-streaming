@@ -1,8 +1,8 @@
 # Secure video streaming implementation plan
 
-Target website: **codewithharry.com**, confirmed by the user on 2026-11-24. The current product is **Secure VDO Streaming**; CodeWithHarry and StreamLab references below are historical.
+Target: a **vdo platform**, as requested by the user. The current product is **Secure VDO Streaming**; StreamLab was the initial prototype name.
 
-Latest user request: remove nonessential functionality from the small dual-provider streaming prototype. Retain the short interactive README and authorized **public** publication under amnakhan1323. Historical brand references below are implementation history; do not relabel existing course/lesson/session identities.
+Latest user request: use **vdo platform** wording everywhere instead of a specific website name. Retain the small dual-provider scope, short interactive README, and authorized **public** publication under amnakhan1323. Do not relabel existing course/lesson/session identities.
 
 Repository inspection: the workspace was empty on 2026-11-24. Node.js 24 and npm are installed; PostgreSQL and Docker are not on PATH. No provider credentials were present or requested through chat.
 
@@ -48,17 +48,17 @@ Repository inspection: the workspace was empty on 2026-11-24. Node.js 24 and npm
 
 Unit/contract tests use explicit fixtures to check official request shapes, cryptographic signatures, authorization, validation, and sanitization; fixtures never replace runtime providers. Live API and browser playback tests need private credentials, real processed assets, matching allowed domains, and correctly enabled protections. Missing values must produce clearly labeled skips/configuration errors, not claimed passes.
 
-## CodeWithHarry continuation
+## vdo platform continuation
 
-The user clarified the scope: a **small Next.js secure-video comparison prototype for codewithharry.com courses**, not a new LMS or expanded curriculum. Existing branding/curriculum work is retained without modifying stored course identities. No additional curriculum is added to an existing database during this correction.
+The user clarified the scope: a **small Next.js secure-video comparison prototype for vdo platform courses**, not a new LMS or expanded curriculum. Existing records are retained without modifying stored course identities. No additional curriculum is added to an existing database during this correction.
 
 - [x] Inspect the partially updated source and the still-running older preview.
 - [x] Make the signed-in landing page the Gumlet/Bunny streaming test bench; retain existing route compatibility.
-- [x] Keep CodeWithHarry identity, but describe this as a streaming-test prototype rather than an integrated coding classroom.
+- [x] Use generic vdo platform wording and describe this as a streaming-test prototype rather than an integrated coding classroom.
 - [x] Keep only comparison, test-course enrollment, and provider setup in primary navigation. Preserve all existing accounts/content/progress/mappings.
 - [x] Prioritize enrolled lessons mapped to both providers and require both mappings for the paired run. Show missing credential/configuration states explicitly.
 - [x] Test the real authentication and enrollment denial paths for both providers, without fabricating playback results.
-- [x] Document the focused workflow and exact codewithharry.com/www deployment boundaries. Do not change real provider domains automatically.
+- [x] Document the focused workflow and separate apex/www deployment boundaries. Do not change real provider domains automatically.
 - [x] Pass types, lint, offline tests, production build, and browser tests — 61 offline and 15 production browser/API tests passed; four live checks explicitly skipped; dependency audit clean.
 - [x] Restart the local production preview with the same private session secret and persistent database — existing signed-in browser session and aggregate record counts unchanged; no curricula inserted on restart.
 
@@ -105,11 +105,18 @@ User requested all actionable remaining work; keep the prototype small and never
 - [x] Validate retained security and minimal workflows, update the short interactive README, and safely restart the same preview. All eight aggregate record counts match the pre-restart baseline; the same signed-in session still authenticates.
 - [x] Publish reviewed minimal source and separately observe the new GitHub CI run — implementation 503370c pushed without force; run 45403044863 completed successfully.
 
-## CodeWithHarry video test and simpler README
+## vdo platform video test and simpler README
 
 - [x] Check credential/asset presence without exposing values: development/production keys and live IDs missing; zero mappings in both local provider slots.
 - [x] Attempt live tests honestly — all four skipped. Re-run 81 offline + 18 production browser/API tests, types, and zero-warning lint successfully.
-- [x] Review public CodeWithHarry terms; do not download/rehost its videos without consent or treat homepage access as playback evidence.
+- [x] Review source-website licensing restrictions; do not download/rehost videos without consent or treat homepage access as playback evidence.
 - [x] User chose README updates now and live testing later; keep that boundary explicit.
 - [x] Make the README shorter, clickable, expandable, and easy to follow; include private setup, real IDs, and remaining-user steps.
-- [ ] Test actual authorized CodeWithHarry media on both providers after the user supplies private configuration/assets; follow the browser/CDN acceptance checklist.
+- [ ] Test actual authorized vdo platform media on both providers after the user supplies private configuration/assets; follow the browser/CDN acceptance checklist.
+
+## Generic target wording
+
+- [x] Replace website-specific wording/links with vdo platform throughout app, README, documentation, instructions, and tests.
+- [x] Use display-only target metadata, remove default production domains, and keep explicit provider origin/allowlist checks.
+- [x] Preserve the product name, both provider integrations, stored identities, and existing data.
+- [x] Revalidate types/lint/offline/build/browser checks and restart the same-data preview before reviewed publication — 81 offline + 19 browser/API tests, types/lint/build/audit passed; all fresh aggregate counts and the existing session preserved.

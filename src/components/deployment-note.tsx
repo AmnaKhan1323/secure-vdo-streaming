@@ -7,8 +7,8 @@ export function DeploymentNote() {
       <p className="font-medium text-violet-200">{SITE.name} · deployment is configured separately</p>
       <p className="mt-1.5">
         Keep localhost for development. In production, set the server authentication URL to the exact HTTPS origin
-        that serves this app and approve its hostname at both video providers. {SITE.productionDomains.join(" and ")}
-        {" "}are distinct hostnames; neither is automatically allowed by this prototype.
+        that serves the {SITE.targetName} app and approve its hostname at both video providers.
+        {" "}Apex and www hostnames are distinct; no production hostname is automatically allowed by this prototype.
       </p>
       <p className="mt-1.5 text-[10px] text-muted">
         This standalone prototype does not reuse existing website accounts or paid-course enrollments.

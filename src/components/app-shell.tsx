@@ -47,7 +47,7 @@ export function AppShell({ viewer, children }: { viewer: Viewer; children: React
           <span>
             {SITE.name} · {SITE.prototypeLabel}
           </span>
-          <span>Built for {SITE.domain} · Gumlet + Bunny Stream</span>
+          <span>Built for the {SITE.targetName} · Gumlet + Bunny Stream</span>
         </footer>
       </div>
     </div>

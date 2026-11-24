@@ -5,14 +5,15 @@ import { testCourses } from "../prisma/test-courses";
 import { domainMatches, assertPlaybackPolicy } from "../src/lib/server/providers/policy";
 import { protectedAsset, protectionReport } from "./fixtures";
 
-test("Product identity is Secure VDO Streaming and target domains grant no implicit access", () => {
+test("Product identity uses vdo platform wording and domains grant no implicit access", () => {
   assert.equal(SITE.name, "Secure VDO Streaming");
   assert.equal(SITE.shortName, "SVS");
-  assert.equal(SITE.domain, "codewithharry.com");
-  assert.ok(!domainMatches("www.codewithharry.com", "codewithharry.com"));
-  assert.ok(!domainMatches("codewithharry.com.evil.invalid", "codewithharry.com"));
-  assert.throws(() => assertPlaybackPolicy(protectionReport(), protectedAsset(), "www.codewithharry.com", ["www.codewithharry.com"]), /remote domain restrictions/);
-  assert.doesNotThrow(() => assertPlaybackPolicy({ ...protectionReport(), allowedDomains: ["codewithharry.com", "www.codewithharry.com"] }, protectedAsset(), "www.codewithharry.com", ["codewithharry.com", "www.codewithharry.com"]));
+  assert.equal(SITE.targetName, "vdo platform");
+  assert.ok(!("domain" in SITE) && !("productionDomains" in SITE));
+  assert.ok(!domainMatches("www.vdo-platform.example.com", "vdo-platform.example.com"));
+  assert.ok(!domainMatches("vdo-platform.example.com.evil.invalid", "vdo-platform.example.com"));
+  assert.throws(() => assertPlaybackPolicy(protectionReport(), protectedAsset(), "www.vdo-platform.example.com", ["www.vdo-platform.example.com"]), /remote domain restrictions/);
+  assert.doesNotThrow(() => assertPlaybackPolicy({ ...protectionReport(), allowedDomains: ["vdo-platform.example.com", "www.vdo-platform.example.com"] }, protectedAsset(), "www.vdo-platform.example.com", ["vdo-platform.example.com", "www.vdo-platform.example.com"]));
 });
 
 test("Fresh setup has two text-only streaming/access fixtures, not full curricula or media", () => {

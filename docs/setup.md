@@ -90,7 +90,7 @@ npm.cmd run dev
 
 Docker is optional. Omit `--local` from `admin:promote` for the configured PostgreSQL database. Do not change an initialized database password by editing Compose alone. Production uses `npm.cmd run build` then `npm.cmd start`. Stop a dev server before building because both share **.next**. For a built local preview use `npm.cmd run dev:local -- --production`.
 
-The original evaluation target was codewithharry.com, not an identity/media integration. Before live-site use, connect its authorized authentication and course-entitlement system. The apex and `www` are separate hostnames; choose a canonical HTTPS origin and approve only actual embedding domains. Naming this app never writes production origins or vendor policies automatically.
+The evaluation target is a **vdo platform**, not an automatic identity/media integration. Before live-site use, connect its authorized authentication and course-entitlement system. The apex and `www` are separate hostnames; choose a canonical HTTPS origin and approve only actual embedding domains. Naming this app never writes production origins or vendor policies automatically.
 
 Production also needs trusted proxy headers, native PostgreSQL concurrency verification, backup/retention/monitoring, email verification/recovery/MFA as appropriate, privacy review, and a reviewed nonce-based CSP. The prototype's CSP permits inline hydration scripts/styles; it is not a production certification. No DRM is configured and authorized screen recording cannot be completely prevented.
 

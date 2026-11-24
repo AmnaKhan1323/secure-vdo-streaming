@@ -234,6 +234,7 @@ test("Secure VDO Streaming home is a small dual-provider test bench, with an unc
   await expect(page).toHaveTitle("Secure streaming test · Secure VDO Streaming");
   await expect(page.getByRole("link", { name: "Secure VDO Streaming home" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Secure course-video streaming", exact: true })).toBeVisible();
+  await expect(page.getByText("Built for the vdo platform · Gumlet + Bunny Stream", { exact: true })).toBeVisible();
   await expect(page.getByText("PROTOTYPE · NOT THE LIVE WEBSITE", { exact: true })).toBeVisible();
   await expect(page.getByLabel("Gumlet setup status")).toBeVisible();
   await expect(page.getByLabel("Bunny Stream setup status")).toBeVisible();
@@ -245,6 +246,13 @@ test("Secure VDO Streaming home is a small dual-provider test bench, with an unc
   await expect(page).toHaveTitle("Secure streaming comparison · Secure VDO Streaming");
   await expect(page.getByRole("heading", { name: "Secure course-video streaming", exact: true })).toBeVisible();
   await expect(page.getByRole("navigation", { name: "Main navigation" }).getByRole("link", { name: "Video comparison", exact: true })).toHaveAttribute("aria-current", "page");
+});
+
+test("Public signup, login, and setup pages use vdo platform wording", async ({ page }) => {
+  for (const path of ["/signup", "/login", "/setup"]) {
+    await page.goto(path);
+    await expect(page.locator("#main-content")).toContainText("vdo platform");
+  }
 });
 
 test("Paired lesson mappings are preferred but missing credentials never unlock a run", async ({ page }) => {

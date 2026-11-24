@@ -2,18 +2,27 @@
 
 Verified on **2026-11-24** in the original Windows workspace.
 
-## CodeWithHarry video test — deferred by the user
+## Generic vdo platform wording — current update
+
+- Replaced target-website names, URLs, and public default domains throughout the current app, README, guides, instructions, and tests with **vdo platform** wording. A full tracked-file scan found no old target-name references. Existing Git history and stored IDs were not rewritten.
+- `SITE.targetName` is display-only; authentication origins and provider domains remain explicit server/operator configuration. Real Gumlet/Bunny API/player hosts, signing, and protection gates are unchanged.
+- Strict TypeScript, zero-warning lint, production build, **81 offline tests**, and **19 production Edge browser/API tests passed**. The extra browser case covers generic wording on signup/login/setup; workspace footer wording is also asserted. Dependency audit reported **0 vulnerabilities**.
+- GitHub's Markdown renderer retained all three expandable README helpers and the renamed **Test a vdo platform video** heading/navigation link.
+- Checkpointed/backed up the ignored private database and restarted the preview with the same session secret. All fresh pre-build aggregate counts match after restart: 1 user, 2 sessions, 3 courses, 13 lessons, 1 enrollment; progress/mapping/attempt counts remain zero. No existing accounts, enrollments, identities, or provider mappings were changed.
+- Live provider/media verification remains deferred by the user. Generic wording is not evidence of live playback or production integration.
+
+## vdo platform video test — deferred by the user
 
 - Checked development and production configuration by **presence only**: all seven provider key/scope values and both live asset IDs are missing. No private local environment file is configured; the running local database contains **0 Gumlet and 0 Bunny mappings**. No values or bearer URLs were printed.
-- Attempted the credential-gated live suite: **0 passed, 4 explicitly skipped**. Real CodeWithHarry media playback, expiry, domain restrictions, and CDN enforcement have **not** been tested.
-- The public homepage and [terms](https://www.codewithharry.com/terms) were reviewed, not used as playback evidence. The terms require consent for copying/sharing; no third-party video was downloaded, imported, or rehosted.
+- Attempted the credential-gated live suite: **0 passed, 4 explicitly skipped**. Real vdo platform media playback, expiry, domain restrictions, and CDN enforcement have **not** been tested.
+- Public source-website information and licensing restrictions were reviewed, not used as playback evidence. Copying/sharing requires permission; no third-party video was downloaded, imported, or rehosted.
 - The user selected **update the README now; do the live test later**. That future test requires authorized media, private provider configuration, and the same video's real IDs in both providers.
-- Re-ran unchanged application checks: **81 offline and 18 production Edge browser/API tests passed**, strict TypeScript and zero-warning lint passed. These results establish code/application behavior, not successful playback of CodeWithHarry videos. The existing production build was reused; no concurrent build disrupted the running preview.
+- Re-ran unchanged application checks: **81 offline and 18 production Edge browser/API tests passed**, strict TypeScript and zero-warning lint passed. These results establish code/application behavior, not successful playback of vdo platform videos. The existing production build was reused; no concurrent build disrupted the running preview.
 - README shortened into clickable sections, six easy steps, three expandable helpers, and a clear remaining-work checklist. Provider details and live browser acceptance remain in the linked guides.
 
 ## Minimal scope verification — current release
 
-The latest app contains only the secure-streaming test workflow for codewithharry.com course videos: login/signup, inline test enrollment, both actual Gumlet/Bunny players, signed playback/protection checks, expiry/access probes, saved observations, and essential admin policy/manual ID linking.
+The latest app contains only the secure-streaming test workflow for vdo platform course videos: login/signup, inline test enrollment, both actual Gumlet/Bunny players, signed playback/protection checks, expiry/access probes, saved observations, and essential admin policy/manual ID linking.
 
 - Removed: course marketing/search/curriculum UI, standalone learning player and progress writes, URL imports, catalog browsing, and the duplicate admin playback bench. The import-only IP dependency and obsolete configuration were removed too.
 - Preserved: all existing users, sessions, courses, lessons, enrollments, progress, video mappings, and attempt history. Historical tables/migrations remain; old course URLs redirect to the comparison screen. Fresh databases seed only two text-only playback/access containers, without accounts or media.
@@ -47,12 +56,12 @@ The app was renamed to **Secure VDO Streaming** at the user's request. The READM
 
 Earlier records below are historical. The current results above supersede their counts.
 
-## CodeWithHarry scope correction
+## vdo platform scope correction
 
-The latest verified build is a **small secure-course-video test prototype for codewithharry.com**, with the Gumlet/Bunny test bench as the main signed-in screen. Course pages are supporting enrollment/test containers, not a new CodeWithHarry catalog or LMS.
+The latest verified build is a **small secure-course-video test prototype for a vdo platform**, with the Gumlet/Bunny test bench as the main signed-in screen. Course pages are supporting enrollment/test containers, not a new vdo platform catalog or LMS.
 
 - Production build, strict TypeScript, and zero-warning lint passed again after the focus correction.
-- **61 offline tests passed**, including CodeWithHarry identity/domain boundaries, paired lesson ordering, and preservation of existing course/progress/video data.
+- **61 offline tests passed**, including product identity/domain boundaries, paired lesson ordering, and preservation of existing course/progress/video data.
 - **15 production browser/API tests passed**, including the comparison-first landing page, unchanged comparison route, both-provider access probes, and paired mappings blocked without private credentials.
 - **4 live checks explicitly skipped** without actual provider credentials/assets. No successful live playback claim.
 - Dependency audit: **0 reported vulnerabilities**.
@@ -60,7 +69,7 @@ The latest verified build is a **small secure-course-video test prototype for co
 - In the actual preview, both unauthenticated provider request paths returned 401 `UNAUTHENTICATED`, and both non-enrolled paths returned 403 `NOT_ENROLLED`, without playback URLs. This verifies the application gates, not external provider playback or CDN enforcement.
 - The main test view had no horizontal overflow at a 1440px viewport. The 390px mobile regression also passed.
 
-The original baseline results below are historical; the current counts above supersede them. Actual CodeWithHarry account/entitlement integration and provider credentials are still required for live website deployment.
+The original baseline results below are historical; the current counts above supersede them. Actual vdo platform account/entitlement integration and provider credentials are still required for live website deployment.
 
 ## Completed checks
 

@@ -20,7 +20,7 @@ export async function StreamingTestWorkspace() {
 
   return <>
     <PageHeading
-      eyebrow={`${SITE.name} · ${SITE.domain}`}
+      eyebrow={`${SITE.name} · ${SITE.targetName}`}
       title="Secure course-video streaming"
       description="A small test bench: compare the same authorized lesson on Gumlet and Bunny Stream."
       action={<Badge tone="violet">PROTOTYPE · NOT THE LIVE WEBSITE</Badge>}
@@ -80,7 +80,7 @@ export async function StreamingTestWorkspace() {
 
     <div className="mt-6"><Notice>
       <p className="flex items-center gap-2 font-medium"><ShieldCheck size={14} />Prototype boundary</p>
-      <p className="mt-2">This app is for testing course-video delivery for {SITE.domain}; it does not connect to the existing website accounts, paid entitlements, or official course catalog. Use authorized videos. Sample lesson text is only a test container.</p>
+      <p className="mt-2">This app is for testing course-video delivery for the {SITE.targetName}; it does not connect to the existing website accounts, paid entitlements, or official course catalog. Use authorized videos. Sample lesson text is only a test container.</p>
       <p className="mt-2">A player load, countdown, or HTTP 200 is not proof of protected playback. Actual expiry, referrer, and media/CDN enforcement require configured provider accounts and browser verification.</p>
     </Notice></div>
   </>;
