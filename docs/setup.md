@@ -1,6 +1,6 @@
 # Setup and provider reference
 
-Start with the [README handover guide](../README.md). This page holds the detailed configuration, signing, and production notes.
+Start with the [README user guide](../README.md). This page holds the detailed configuration, signing, and production notes.
 
 ## Local development
 

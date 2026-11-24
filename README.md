@@ -1,10 +1,10 @@
 # Secure VDO Streaming
 
-A small **Next.js + TypeScript** prototype for a **vdo platform**. Compare the **same authorized course video on Gumlet and Bunny Stream**, with login, enrollment checks, short-lived playback links, and browser observations.
+A small **Next.js + TypeScript** prototype for educators and developers who need to evaluate secure video delivery for a **vdo platform**. Compare the **same authorized course video on Gumlet and Bunny Stream**, with login, enrollment checks, short-lived playback links, and browser observations.
 
-**New maintainer?** Start with [First run](#first-run), follow [Connect both providers](#connect-both-providers), then complete [Test and accept the handover](#test-and-accept-the-handover). Expand the sections below when you need details.
+**Getting started?** Follow [First run](#first-run), [Connect both providers](#connect-both-providers), and [Testing and verification](#testing-and-verification). Expand the sections below for configuration, troubleshooting, and deployment help.
 
-[Scope and status](#scope-and-status) · [First run](#first-run) · [Providers](#connect-both-providers) · [Configuration](#configuration-reference) · [Tests](#test-and-accept-the-handover) · [Security](#how-it-works-and-security-limits) · [Code map](#code-map) · [Operations](#deployment-data-and-ownership) · [Troubleshooting / FAQ](#troubleshooting-and-faq)
+[Scope and status](#scope-and-status) · [First run](#first-run) · [Providers](#connect-both-providers) · [Configuration](#configuration-reference) · [Tests](#testing-and-verification) · [Security](#how-it-works-and-security-limits) · [Code map](#code-map) · [Operations](#deployment-data-and-ownership) · [Troubleshooting / FAQ](#troubleshooting-and-faq)
 
 > **The prototype is implemented; real provider playback is not yet verified.** You must supply private provider access and authorized video assets. This repository does not include credentials, video files, existing users, or a deployment.
 
@@ -129,7 +129,7 @@ Exact account-specific fields, encoding notes, API endpoints, and official links
 
 </details>
 
-## Test and accept the handover
+## Testing and verification
 
 Stop the dev/preview server before the build checks. Use a disposable/authorized provider scope for live acceptance, not someone else's active library.
 
@@ -269,14 +269,14 @@ See [detailed deployment guidance](docs/setup.md#standard-postgresql-and-deploym
 </details>
 
 <details>
-<summary><strong>Transfer existing data safely, backups, access ownership, and license</strong></summary>
+<summary><strong>Protect your data: backups, access ownership, and license</strong></summary>
 
 - A fresh clone creates fresh local data. Git intentionally excludes private environment files, **.local**, generated client, dependencies, and build/test output. Repo access does not grant old accounts, provider dashboards, database access, or video rights.
 - If preserving local data is required, **stop the app/database first**, then back up the entire **.local** folder securely, including its session secret. Transfer/restore only through an approved encrypted/private channel with the app stopped. Protect backups like passwords; do not attach them to public issues or commits.
 - For native PostgreSQL, use the host's supported consistent database backup/restore process and test restore in isolation. Transfer secrets separately through a password manager/secret store. Preserve mappings, enrollment, migration history, and intended auth configuration; a new hostname or planned secret rotation can require re-login.
 - Do not delete databases, remove migrations, run reset commands, or regenerate the existing secret just to fix a configuration problem. Have a rollback/data-preservation plan before changes.
-- Transfer GitHub maintainer/admin access, hosting/DNS, database/backup ownership, provider workspace/library/Pull Zone access, billing, and media authorization as separate items. The app does not transfer these accounts for you.
-- Agree who owns unresolved live acceptance and production tasks. Use scoped credentials; coordinate rotation/revocation after handover and reverify playback rather than putting old keys in the repository.
+- Manage GitHub admin access, hosting/DNS, database/backup ownership, provider workspace/library/Pull Zone access, billing, and media authorization separately. Access to this app does not grant access to those accounts.
+- Assign responsibility for live verification and production maintenance. Use scoped credentials, rotate/revoke them when account access changes, and reverify playback rather than putting old keys in the repository.
 - **Project license is not specified:** no project license file is supplied. Confirm intended use/distribution terms with the repository owner; public visibility and npm's `private: true` flag are not a project license. Third-party dependencies, provider terms, and media rights remain separate responsibilities.
 
 </details>
@@ -311,7 +311,7 @@ Share only the **sanitized** error code/message, command, Node/browser version, 
 </details>
 
 <details>
-<summary><strong>Quick answers to handover questions</strong></summary>
+<summary><strong>Common questions</strong></summary>
 
 - **Can I paste a course/YouTube URL and play it?** No. Supply authorized media already processed in each provider and link its actual ID. This app has no download/import/upload feature.
 - **Where are the videos or default passwords?** They are not in the repo. Create your own account, grant admin explicitly, and obtain provider assets/keys privately.
@@ -327,10 +327,10 @@ Share only the **sanitized** error code/message, command, Node/browser version, 
 
 </details>
 
-### Handover acceptance checklist
+### Setup checklist
 
-- [ ] Recipient can install from the lockfile, start the chosen database mode, sign up, and obtain admin access without default credentials.
-- [ ] Recipient knows the three configuration locations: private environment, application database, and provider consoles.
+- [ ] Install from the lockfile, start the chosen database mode, sign up, and obtain admin access without default credentials.
+- [ ] Review the three configuration locations: private environment, application database, and provider consoles.
 - [ ] Both provider scopes/keys and authorized assets are owned/accessible by the intended operator; both real IDs are linked to one lesson.
 - [ ] Both application access probes and the automated checks pass; skipped live checks are tracked as **pending**, not accepted.
 - [ ] Browser evidence is recorded for both providers, including expiry/tampering/domain/unsigned-media tests; limitations are understood.
