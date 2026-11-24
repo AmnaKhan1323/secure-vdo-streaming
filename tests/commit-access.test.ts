@@ -22,7 +22,7 @@ test("Authorized commit checks use current locked PostgreSQL rows, not pre-provi
     await prisma.enrollment.create({ data: { userId: identity.viewer.id, courseId: "cwh-web-development" } });
     const mapping = await prisma.lessonVideo.create({ data: { lessonId, provider: "GUMLET", assetId: "6192269e0822a81d955d1a4b" } });
     const setting = await prisma.providerSetting.update({ where: { provider: "GUMLET" }, data: { enabled: true } });
-    const verified = { assetId: mapping.assetId, mappingUpdatedAt: mapping.updatedAt, setting };
+    const verified = { assetId: mapping.assetId, mappingUpdatedAt: mapping.updatedAt, mappingId: mapping.id, mappingRevision: mapping.revision, setting };
     const commit = () => prisma.$transaction(async (transaction) => {
       await lockIdentity(transaction, identity);
       await lockLessonEnrollment(transaction, identity.viewer, lessonId);
@@ -45,9 +45,9 @@ test("Authorized commit checks use current locked PostgreSQL rows, not pre-provi
       await prisma.user.update({ where: { id: identity.viewer.id }, data: { role: "STUDENT" } });
     });
     await context.test("Replacing a verified video prevents stale issuance", async () => {
-      await prisma.lessonVideo.update({ where: { id: mapping.id }, data: { assetId: "aaaaaaaaaaaaaaaaaaaaaaaa" } });
+      await prisma.lessonVideo.update({ where: { id: mapping.id }, data: { assetId: "aaaaaaaaaaaaaaaaaaaaaaaa", revision: { increment: 1 } } });
       await assert.rejects(commit, denied("PLAYBACK_CONFIGURATION_CHANGED"));
-      await prisma.lessonVideo.update({ where: { id: mapping.id }, data: { assetId: mapping.assetId, updatedAt: mapping.updatedAt } });
+      await prisma.lessonVideo.update({ where: { id: mapping.id }, data: { assetId: mapping.assetId, revision: mapping.revision, updatedAt: mapping.updatedAt } });
     });
     await context.test("Disabling or changing provider policy prevents stale issuance", async () => {
       await prisma.providerSetting.update({ where: { provider: "GUMLET" }, data: { enabled: false } });

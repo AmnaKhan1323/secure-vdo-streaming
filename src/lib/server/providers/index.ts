@@ -22,6 +22,6 @@ export async function providerSettings(): Promise<ProviderSettingsView[]> {
   const settings = await db().providerSetting.findMany();
   return (["GUMLET", "BUNNY"] as const).map((provider) => {
     const setting = settings.find((item) => item.provider === provider);
-    return { provider, enabled: setting?.enabled ?? false, ttlSeconds: setting?.ttlSeconds ?? 300, allowedDomains: setting?.allowedDomains ?? [], ...providerConfiguration(provider) };
+    return { provider, enabled: setting?.enabled ?? false, ttlSeconds: setting?.ttlSeconds ?? 300, allowedDomains: setting?.allowedDomains ?? [], revision: setting?.revision ?? 0, configurationState: setting?.configurationState ?? "ready", ...providerConfiguration(provider) };
   });
 }

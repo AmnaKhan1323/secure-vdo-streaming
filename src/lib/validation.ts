@@ -11,17 +11,11 @@ export const playbackRequestSchema = z.object({
   lessonId: idSchema,
   provider: providerSchema,
   mode: z.enum(["standard", "expired", "tampered"]).default("standard"),
-  purpose: z.enum(["lesson", "comparison"]).default("lesson"),
+  purpose: z.literal("comparison").default("comparison"),
   ttlSeconds: z.number().int().min(30).max(3600).optional(),
 }).strict();
 
 export const enrollmentSchema = z.object({ courseId: idSchema }).strict();
-export const progressSchema = z.object({
-  lessonId: idSchema,
-  attemptId: z.uuid(),
-  sequence: z.number().int().min(1).max(1_000_000_000),
-  positionSeconds: z.number().finite().min(0).max(86400),
-}).strict();
 
 const timing = z.number().finite().min(0).max(3_600_000).optional();
 export const metricsSchema = z.object({
@@ -40,6 +34,7 @@ export const providerSettingSchema = z.object({
   ttlSeconds: z.number().int().min(60).max(3600),
   allowedDomains: z.array(hostnameSchema).min(1).max(20).transform((values) => [...new Set(values)]),
   applyRemote: z.boolean().default(false),
+  expectedRevision: z.number().int().nonnegative().optional(),
 }).strict();
 
 export const videoMappingSchema = z.object({
@@ -52,8 +47,3 @@ export const videoMappingSchema = z.object({
   if (!result.success) context.addIssue({ code: "custom", path: ["assetId"], message: "Invalid asset ID for this provider." });
 });
 
-export const importVideoSchema = z.object({
-  provider: providerSchema,
-  title: z.string().trim().min(1).max(160),
-  sourceUrl: z.url().max(2048),
-}).strict();

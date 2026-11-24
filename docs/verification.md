@@ -2,6 +2,23 @@
 
 Verified on **2026-11-24** in the original Windows workspace.
 
+## Minimal scope verification — current release
+
+The latest app contains only the secure-streaming test workflow for codewithharry.com course videos: login/signup, inline test enrollment, both actual Gumlet/Bunny players, signed playback/protection checks, expiry/access probes, saved observations, and essential admin policy/manual ID linking.
+
+- Removed: course marketing/search/curriculum UI, standalone learning player and progress writes, URL imports, catalog browsing, and the duplicate admin playback bench. The import-only IP dependency and obsolete configuration were removed too.
+- Preserved: all existing users, sessions, courses, lessons, enrollments, progress, video mappings, and attempt history. Historical tables/migrations remain; old course URLs redirect to the comparison screen. Fresh databases seed only two text-only playback/access containers, without accounts or media.
+- Retained hardening: serialized provider configuration with failed-update recovery, explicit mapping ID/revisions, scope/asset identity checks, bounded SDK setup with cleanup/retry, and transaction-locked authorization. No learner-progress callback or API remains.
+- Production build, strict TypeScript, and zero-warning lint: **passed**.
+- Offline security/provider/SDK/database tests: **81 passed**.
+- Production Edge browser/API tests: **18 passed**, including inline enrollment, both-provider denial probes, closed/unpublished courses, manual admin setup, unavailable removed APIs, and compatibility redirects.
+- Dependency audit: **0 reported vulnerabilities**. One transient registry connection reset was retried successfully without disabling TLS.
+- Live provider checks: **4 explicitly skipped** without private credentials/assets. No live playback, CDN, domain, or expiry acceptance is claimed.
+- Same-data production preview restarted at http://localhost:3000/dashboard after an ignored private backup. All eight aggregate counts matched the pre-restart baseline (1 user, 1 session, 3 courses, 13 lessons; enrollment/progress/mapping/attempt counts remain zero). The existing session still authenticates; no extra courses, accounts, roles, or enrollments were created.
+- The README is short, clickable, and expandable; exact provider instructions and remaining operator requirements are in [setup.md](setup.md) and [testing.md](testing.md).
+
+Earlier counts and learning-platform features below describe historical releases, not the current scope.
+
 ## Secure VDO Streaming release verification
 
 The app was renamed to **Secure VDO Streaming** at the user's request. The README now includes an easy numbered usage guide and an explicit user-owned gaps checklist. Legacy course IDs, session secrets, database names, and enrolled content were not relabeled.

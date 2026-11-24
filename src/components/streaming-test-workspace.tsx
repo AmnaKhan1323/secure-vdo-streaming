@@ -1,21 +1,22 @@
 import Link from "next/link";
-import { ArrowRight, BookOpen, Settings2, ShieldCheck } from "lucide-react";
+import { ArrowRight, Settings2, ShieldCheck } from "lucide-react";
 import { requirePageViewer } from "@/lib/server/authorization";
-import { getAttempts, getCourses } from "@/lib/server/queries";
+import { getAttempts, getTestCourses } from "@/lib/server/queries";
 import { providerSettings } from "@/lib/server/providers";
 import { comparisonLessons } from "@/lib/comparison-lessons";
 import { SITE } from "@/lib/site";
 import { formatMilliseconds } from "@/lib/utils";
 import { ComparisonLab } from "./comparison-lab";
 import { Badge, Notice, PageHeading, ProviderBadge } from "./ui";
+import { CourseAccess } from "./course-access";
 
 export async function StreamingTestWorkspace() {
   const viewer = await requirePageViewer();
   const [courses, attempts, settings] = await Promise.all([
-    getCourses(viewer), getAttempts(viewer), providerSettings(),
+    getTestCourses(viewer), getAttempts(viewer), providerSettings(),
   ]);
   const lessons = comparisonLessons(courses);
-  const nonEnrolledLessonId = courses.find((course) => !course.enrollments.length)?.lessons[0]?.id;
+  const nonEnrolledLessonId = courses.find((course) => course.published && !course.enrollments.length && course.lessons.length)?.lessons[0]?.id;
 
   return <>
     <PageHeading
@@ -30,7 +31,7 @@ export async function StreamingTestWorkspace() {
         <div className="flex flex-wrap items-center justify-between gap-3">
           <ProviderBadge provider={setting.provider} />
           <Badge tone={setting.configured && setting.enabled ? "blue" : "amber"}>
-            {!setting.configured ? "Credentials required" : !setting.enabled ? "Enable in provider setup" : "Configured · playback unverified"}
+            {setting.configurationState === "updating" ? "Configuration updating" : setting.configurationState === "failed" ? "Update failed · retry setup" : !setting.configured ? "Credentials required" : !setting.enabled ? "Enable in provider setup" : "Configured · playback unverified"}
           </Badge>
         </div>
         <p className="mt-3 text-xs leading-5 text-muted">
@@ -48,14 +49,14 @@ export async function StreamingTestWorkspace() {
         enroll in a test course → link the same source video on both providers → run playback, expiry, and access tests.
       </p>
       <div className="flex flex-wrap gap-2">
-        <Link href="/courses" className="btn-secondary text-xs"><BookOpen size={13} />Test courses</Link>
         <Link href={viewer.role === "ADMIN" ? "/admin" : "/setup"} className="btn-secondary text-xs">
           <Settings2 size={13} />{viewer.role === "ADMIN" ? "Provider setup" : "Setup requirements"}
         </Link>
       </div>
     </div>
 
-    <ComparisonLab lessons={lessons} isAdmin={viewer.role === "ADMIN"} nonEnrolledLessonId={nonEnrolledLessonId} settings={settings} />
+    <CourseAccess courses={courses.map((course) => ({ id: course.id, title: course.title, enrolled: course.enrollments.length > 0, canEnroll: course.published && course.openEnrollment }))} />
+    <ComparisonLab key={lessons.map((lesson) => lesson.id).join(":")} lessons={lessons} isAdmin={viewer.role === "ADMIN"} nonEnrolledLessonId={nonEnrolledLessonId} settings={settings} />
 
     <details className="panel mt-6 overflow-hidden">
       <summary className="flex flex-wrap items-center justify-between gap-3 p-5">

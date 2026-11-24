@@ -5,6 +5,7 @@ declare module "player.js" {
     on(event: string, callback: (data?: unknown) => void): void;
     off(event: string, callback?: (data?: unknown) => void): void;
     setCurrentTime(seconds: number): void;
+    getCurrentTime(callback: (seconds: number) => void): void;
     play(): void;
     pause(): void;
   }

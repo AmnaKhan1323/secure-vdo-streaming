@@ -32,7 +32,7 @@ export async function lockLessonEnrollment(transaction: Prisma.TransactionClient
 }
 
 export async function lockVideoMapping(transaction: Prisma.TransactionClient, lessonId: string, provider: VideoProvider) {
-  const mappings = await transaction.$queryRaw<{ assetId: string; updatedAt: Date }[]>(Prisma.sql`SELECT "assetId", "updatedAt" FROM "LessonVideo" WHERE "lessonId" = ${lessonId} AND "provider" = ${provider}::"Provider" FOR SHARE`);
+  const mappings = await transaction.$queryRaw<{ id: string; assetId: string; revision: number; updatedAt: Date }[]>(Prisma.sql`SELECT "id", "assetId", "revision", "updatedAt" FROM "LessonVideo" WHERE "lessonId" = ${lessonId} AND "provider" = ${provider}::"Provider" FOR SHARE`);
   if (!mappings.length) throw new AppError("VIDEO_NOT_CONFIGURED", "The lesson video mapping was removed.", 409);
   return mappings[0];
 }
@@ -40,17 +40,19 @@ export async function lockVideoMapping(transaction: Prisma.TransactionClient, le
 export type VerifiedPlaybackState = {
   assetId: string;
   mappingUpdatedAt: Date;
-  setting: { enabled: boolean; ttlSeconds: number; allowedDomains: string[]; updatedAt: Date };
+  mappingId: string;
+  mappingRevision: number;
+  setting: { enabled: boolean; ttlSeconds: number; allowedDomains: string[]; updatedAt: Date; revision: number; configurationState: string };
 };
 
 export async function lockVerifiedPlayback(transaction: Prisma.TransactionClient, lessonId: string, provider: VideoProvider, verified: VerifiedPlaybackState) {
   const mapping = await lockVideoMapping(transaction, lessonId, provider);
-  const settings = await transaction.$queryRaw<{ enabled: boolean; ttlSeconds: number; allowedDomains: string[]; updatedAt: Date }[]>(Prisma.sql`SELECT "enabled", "ttlSeconds", "allowedDomains", "updatedAt" FROM "ProviderSetting" WHERE "provider" = ${provider}::"Provider" FOR SHARE`);
+  const settings = await transaction.$queryRaw<VerifiedPlaybackState["setting"][]>(Prisma.sql`SELECT "enabled", "ttlSeconds", "allowedDomains", "updatedAt", "revision", "configurationState" FROM "ProviderSetting" WHERE "provider" = ${provider}::"Provider" FOR SHARE`);
   const current = settings[0];
-  if (mapping.assetId !== verified.assetId || mapping.updatedAt.getTime() !== verified.mappingUpdatedAt.getTime()) {
+  if (mapping.assetId !== verified.assetId || mapping.id !== verified.mappingId || mapping.revision !== verified.mappingRevision) {
     throw new AppError("PLAYBACK_CONFIGURATION_CHANGED", "The lesson video changed during authorization. Request playback again.", 409);
   }
-  if (!current?.enabled || current.updatedAt.getTime() !== verified.setting.updatedAt.getTime()
+  if (!current?.enabled || current.configurationState !== "ready" || current.revision !== verified.setting.revision
     || current.ttlSeconds !== verified.setting.ttlSeconds
     || JSON.stringify(current.allowedDomains) !== JSON.stringify(verified.setting.allowedDomains)) {
     throw new AppError("PLAYBACK_CONFIGURATION_CHANGED", "The provider policy changed during authorization. Request playback again.", 409);

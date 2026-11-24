@@ -57,20 +57,9 @@ export class BunnyAdapter {
   async getAsset(id: string) {
     bunnyVideoIdSchema.parse(id);
     const video = await this.stream(`/videos/${id}`, videoSchema);
+    if (video.guid.toLowerCase() !== id.toLowerCase()) throw new AppError("ASSET_ID_MISMATCH", "Bunny returned a different video than requested.", 502);
     if (String(video.videoLibraryId) !== this.credentials.libraryId) throw new AppError("ASSET_SCOPE_MISMATCH", "The Bunny video is not in the configured library.", 403);
     return this.toAsset(video);
-  }
-
-  async listAssets(page = 1) {
-    const response = await this.stream(`/videos?page=${page}&itemsPerPage=20&orderBy=date`, z.object({ items: z.array(videoSchema), totalItems: z.number().int().nonnegative() }));
-    return { assets: response.items.map((video) => this.toAsset(video)), total: response.totalItems, page, pageSize: 20 };
-  }
-
-  async importVideo(title: string, sourceUrl: string) {
-    const result = await this.stream("/videos/fetch", z.object({ success: z.boolean(), statusCode: z.number().optional() }), { url: sourceUrl, title });
-    if (!result.success) throw new AppError("PROVIDER_IMPORT_REJECTED", "Bunny rejected the remote import. Check the accessible source URL and library quota.", 502);
-    // Official FetchVideo response is StatusModel, not a VideoModel/GUID.
-    return { assetId: null, status: "accepted", message: "Bunny accepted the fetch. Refresh its real catalog after processing and explicitly select the resulting video. Fetch does not return a documented video ID." };
   }
 
   private async library() {

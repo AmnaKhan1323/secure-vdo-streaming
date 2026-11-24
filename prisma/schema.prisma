@@ -122,6 +122,7 @@ model LessonVideo {
   lessonId  String
   provider  Provider
   assetId   String
+  revision  Int      @default(1)
   updatedAt DateTime @updatedAt
   lesson    Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
   @@unique([lessonId, provider])
@@ -137,6 +138,8 @@ model Enrollment {
   @@unique([userId, courseId])
 }
 
+// Historical learner progress is retained for data preservation only.
+// The minimal streaming comparator has no progress-writing endpoint or UI.
 model LessonProgress {
   id             String    @id @default(cuid())
   userId         String
@@ -160,6 +163,10 @@ model ProviderSetting {
   enabled        Boolean  @default(false)
   ttlSeconds     Int      @default(300)
   allowedDomains String[] @default([])
+  revision       Int      @default(0)
+  configurationState String @default("ready")
+  operationId    String?
+  operationStartedAt DateTime?
   updatedAt      DateTime @updatedAt
 }
 
@@ -170,6 +177,8 @@ model PlaybackAttempt {
   provider        Provider
   assetId         String?
   assetMappedAt   DateTime?
+  mappingId       String?
+  mappingRevision Int?
   purpose         String   @default("lesson")
   mode            String   @default("standard")
   outcome         String   @default("issued")

@@ -1,3 +1,3 @@
 export default function Loading() {
-  return <div role="status" aria-label="Loading workspace" className="animate-pulse"><div className="mb-3 h-8 w-64 rounded-lg bg-surface-raised" /><div className="mb-8 h-4 w-80 max-w-full rounded bg-surface-raised" /><div className="panel mb-6 h-48" /><div className="grid gap-5 md:grid-cols-3">{[1, 2, 3].map((item) => <div key={item} className="panel h-72" />)}</div><span className="sr-only">Loading workspace...</span></div>;
+  return <div role="status" aria-label="Loading workspace" className="animate-pulse"><div className="mb-3 h-8 w-64 rounded-lg bg-surface-raised" /><div className="mb-6 h-4 w-80 max-w-full rounded bg-surface-raised" /><div className="panel mb-5 h-24" /><div className="grid gap-5 md:grid-cols-2">{["Gumlet", "Bunny Stream"].map((provider) => <div key={provider} className="panel h-56" />)}</div><span className="sr-only">Loading streaming test…</span></div>;
 }

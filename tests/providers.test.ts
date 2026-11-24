@@ -43,23 +43,6 @@ test("Gumlet MP4-only/unknown asset state is preserved for fail-closed policy", 
   assert.equal(asset.signedPlayback, null);
 });
 
-test("Gumlet catalog uses documented pagination and sanitizes every asset", async () => {
-  const fixture = transport([{ all_assets: [gumletAssetResponse], total_asset_count: 31 }]);
-  const result = await gumlet(fixture.fetcher).listAssets(2);
-  assert.equal(fixture.calls[0].url, `https://api.gumlet.com/v1/video/assets/list/${WORKSPACE_ID}?page_number=2&page_size=20&sortBy=created_at&orderBy=desc`);
-  assert.equal(result.total, 31);
-  assert.ok(!JSON.stringify(result).includes("never-return"));
-});
-
-test("Gumlet imports ABR with MP4 access false using actual create fields", async () => {
-  const fixture = transport([{ asset_id: ASSET_ID, status: "pre-queued" }]);
-  const result = await gumlet(fixture.fetcher).importVideo("Lesson", "https://media.example.com/lesson.mp4");
-  assert.equal(fixture.calls[0].url, "https://api.gumlet.com/v1/video/assets");
-  assert.equal(fixture.calls[0].init?.method, "POST");
-  assert.deepEqual(JSON.parse(String(fixture.calls[0].init?.body)), { workspace_id: WORKSPACE_ID, input: "https://media.example.com/lesson.mp4", title: "Lesson", format: "ABR", mp4_access: false });
-  assert.equal(result.assetId, ASSET_ID);
-});
-
 test("Gumlet protection DTO never returns signing secret or channel password", async () => {
   const fixture = transport([gumletWorkspaceResponse]);
   const report = await gumlet(fixture.fetcher).getProtection();
@@ -91,15 +74,6 @@ test("Bunny get uses Stream AccessKey, real scope, and a secret-free DTO", async
   assert.equal(result.ready, true);
   assert.ok(!JSON.stringify(result).includes("never-return"));
   await assert.rejects(() => bunny(transport([{ ...bunnyVideoResponse, videoLibraryId: 654321 }]).fetcher).getAsset(VIDEO_ID), /configured library/);
-});
-
-test("Bunny URL fetch returns accepted status without inventing a video GUID", async () => {
-  const fixture = transport([{ success: true, statusCode: 200 }]);
-  const result = await bunny(fixture.fetcher).importVideo("Lesson", "https://media.example.com/lesson.mp4");
-  assert.equal(fixture.calls[0].url, `https://video.bunnycdn.com/library/${LIBRARY_ID}/videos/fetch`);
-  assert.deepEqual(JSON.parse(String(fixture.calls[0].init?.body)), { url: "https://media.example.com/lesson.mp4", title: "Lesson" });
-  assert.equal(result.assetId, null);
-  await assert.rejects(() => bunny(transport([{ success: false }]).fetcher).importVideo("Lesson", "https://media.example.com/lesson.mp4"), /rejected/);
 });
 
 test("Bunny checks library and linked Pull Zone with distinct Core key and no secret DTO", async () => {
@@ -165,4 +139,9 @@ test("Admin revocation guard stops additional Bunny remote mutations", async () 
     if (++authorizationChecks === 2) throw new Error("Administrator role was revoked.");
   }), /revoked/);
   assert.equal(fixture.calls.length, 2, "Library read and first authorized update only; no referrer/Pull Zone mutation after revocation.");
+});
+
+test("Both adapters reject a different same-scope asset than the requested ID", async () => {
+  await assert.rejects(() => gumlet(transport([{ ...gumletAssetResponse, asset_id: "aaaaaaaaaaaaaaaaaaaaaaaa" }]).fetcher).getAsset(ASSET_ID), /different asset/);
+  await assert.rejects(() => bunny(transport([{ ...bunnyVideoResponse, guid: "22222222-2222-4222-8222-222222222222" }]).fetcher).getAsset(VIDEO_ID), /different video/);
 });

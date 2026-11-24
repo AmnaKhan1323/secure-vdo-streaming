@@ -61,4 +61,6 @@ export type ProviderSettingsView = {
   allowedDomains: string[];
   configured: boolean;
   missing: string[];
+  revision: number;
+  configurationState: string;
 };

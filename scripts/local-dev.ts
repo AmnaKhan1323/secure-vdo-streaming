@@ -8,6 +8,7 @@ import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "../src/generated/prisma/client";
 import { seed } from "../prisma/seed";
 import { startLocalDatabase } from "./local-db";
+import { closeOnStartupFailure } from "./startup-cleanup";
 
 config({ path: ".env.local", quiet: true });
 
@@ -32,6 +33,9 @@ async function main() {
   const appUrl = process.env.BETTER_AUTH_URL || `http://localhost:${appPort}`;
   if (![ `http://localhost:${appPort}`, `http://127.0.0.1:${appPort}` ].includes(appUrl)) throw new Error("The local launcher requires BETTER_AUTH_URL to match the loopback application port.");
   const database = await startLocalDatabase(path.join(localPath, "postgres"), dbPort);
+  let databaseClosed = false;
+  const closeDatabase = async () => { if (!databaseClosed) { databaseClosed = true; await database.close(); } };
+  await closeOnStartupFailure({ close: closeDatabase }, async () => {
   const prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString: database.url, max: 1 }) });
   try {
     // Bootstrap an empty database only. Restarting the prototype must not add
@@ -50,12 +54,14 @@ async function main() {
     if (stopped) return;
     stopped = true;
     child.kill();
-    await database.close();
+    await closeDatabase();
   }
   process.on("SIGINT", () => { void stop().then(() => process.exit(0)); });
   process.on("SIGTERM", () => { void stop().then(() => process.exit(0)); });
   child.on("error", () => { console.error("[streamlab] Application process could not start."); void stop().then(() => { process.exitCode = 1; }); });
   child.on("exit", (code) => { void stop().then(() => { process.exitCode = code ?? 0; }); });
+  await new Promise<void>((resolve, reject) => { child.once("spawn", resolve); child.once("error", reject); });
+  });
 }
 
 main().catch((error) => {

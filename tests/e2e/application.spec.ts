@@ -43,11 +43,11 @@ test("Signup cannot grant a client-supplied administrator role", async ({ reques
     expect(admin.status()).toBe(200);
     const html = await admin.text();
     expect(html).toContain('url=/dashboard');
-    expect(html).not.toContain('Your video library');
+    expect(html).not.toContain('Link test videos');
   }
-  const catalog = await request.get("/api/admin/videos/catalog?provider=GUMLET");
-  expect(catalog.status()).toBe(403);
-  expect((await catalog.json()).error.code).toBe("FORBIDDEN");
+  const mapping = await request.post("/api/admin/videos", { headers: { Origin: origin }, data: { lessonId, provider: "GUMLET", assetId: "6192269e0822a81d955d1a4b" } });
+  expect(mapping.status()).toBe(403);
+  expect((await mapping.json()).error.code).toBe("FORBIDDEN");
 });
 
 test("Enrollment gate and missing-video state remain distinct and fail closed", async ({ request }) => {
@@ -82,19 +82,16 @@ test("CSRF, role spoofing, admin-only probes, and oversized bodies are rejected"
   expect(large.status()).toBe(413);
 });
 
-test("Invalid progress/measurement cannot impersonate another account", async ({ request }) => {
+test("Measurement requests cannot impersonate another account", async ({ request }) => {
   await signUp(request);
   await request.post("/api/enrollments", { headers: { Origin: origin }, data: { courseId } });
-  const progress = await request.post("/api/progress", { headers: { Origin: origin }, data: { lessonId, attemptId: randomUUID(), sequence: 1, positionSeconds: 10 } });
-  expect(progress.status()).toBe(403);
-  expect((await progress.json()).error.code).toBe("PLAYBACK_SESSION_EXPIRED");
   const measurement = await request.post(`/api/measurements/${randomUUID()}`, { headers: { Origin: origin }, data: { outcome: "ready", readyMs: 5 } });
   expect(measurement.status()).toBe(404);
-  const forcedCompletion = await request.post("/api/progress", { headers: { Origin: origin }, data: { lessonId, attemptId: randomUUID(), sequence: 1, positionSeconds: 0, completed: true } });
-  expect(forcedCompletion.status()).toBe(400);
+  const spoofed = await request.post(`/api/measurements/${randomUUID()}`, { headers: { Origin: origin }, data: { outcome: "ready", readyMs: 5, userId: "victim" } });
+  expect(spoofed.status()).toBe(400);
 });
 
-test("UI signup, catalog filtering, enrollment, provider switcher, and comparison work", async ({ page }) => {
+test("Signup, inline course enrollment, both provider slots, and access probes work", async ({ page }) => {
   await page.goto("/signup");
   await page.getByLabel("Full name").fill("Jamie Learner");
   await page.getByLabel("Email address").fill(`${randomUUID()}@example.test`);
@@ -103,20 +100,13 @@ test("UI signup, catalog filtering, enrollment, provider switcher, and compariso
   await expect(page).toHaveURL(/\/dashboard$/);
   await expect(page.getByRole("heading", { name: "Secure course-video streaming", exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: "Run both providers" })).toBeDisabled();
-  await page.getByRole("navigation", { name: "Main navigation" }).getByRole("link", { name: "Test courses", exact: true }).click();
-  await page.getByLabel("Filter course catalog").fill("web development");
-  await expect(page.getByRole("heading", { name: "Web development foundations" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Python programming essentials" })).toHaveCount(0);
-  await page.getByRole("heading", { name: "Web development foundations" }).click();
-  await page.getByRole("button", { name: "Enroll in this course" }).click();
-  await expect(page.getByRole("link", { name: "Continue learning", exact: true })).toBeVisible();
-  await page.getByRole("link", { name: "Continue learning", exact: true }).click();
-  await expect(page.getByText("A real video is needed first.")).toBeVisible();
-  await page.getByRole("button", { name: "Bunny Stream", exact: true }).click();
+  await page.getByLabel("Test course", { exact: true }).selectOption(courseId);
+  await page.getByRole("button", { name: "Enroll for testing", exact: true }).click();
+  await expect(page.getByText("Enrolled for testing", { exact: true })).toBeVisible();
+  await expect(page.getByLabel("Enrolled lesson")).toHaveValue(lessonId);
+  await expect(page.getByText("A real video is needed first.", { exact: true })).toHaveCount(2);
   await expect(page.getByText(/No Bunny Stream video has been linked/)).toBeVisible();
   await expect(page.locator("iframe")).toHaveCount(0);
-  await page.getByRole("link", { name: "Video comparison", exact: true }).click();
-  await expect(page.getByRole("heading", { name: "Secure course-video streaming", exact: true })).toBeVisible();
   await page.getByRole("button", { name: "Test without a session" }).click();
   await expect(page.getByText(/Authentication gate verified:.*UNAUTHENTICATED/)).toBeVisible();
   await expect(page.getByText(/Authentication gate verified: Gumlet: HTTP 401; Bunny Stream: HTTP 401/)).toBeVisible();
@@ -137,9 +127,9 @@ test("Mobile navigation is usable and layouts have no horizontal overflow", asyn
   await expect(page).toHaveURL(/\/dashboard$/);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   await page.getByRole("button", { name: "Open navigation" }).click();
-  await page.getByRole("navigation", { name: "Main navigation" }).getByRole("link", { name: "Test courses", exact: true }).click();
-  await expect(page).toHaveURL(/\/courses$/);
-  await expect(page.getByLabel("Filter course catalog")).toBeVisible();
+  await page.getByRole("navigation", { name: "Main navigation" }).getByRole("link", { name: "Video comparison", exact: true }).click();
+  await expect(page).toHaveURL(/\/dashboard$/);
+  await expect(page.getByLabel("Test course", { exact: true })).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
 });
 
@@ -159,8 +149,9 @@ test("Out-of-band admin grants unlock tools without bypassing enrollment or miss
   try { await prisma.user.update({ where: { id: result.user.id }, data: { role: "ADMIN" } }); }
   finally { await prisma.$disconnect(); }
   await page.goto("/admin");
-  await expect(page.getByRole("heading", { name: "A secure foundation for every lesson." })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Your video library" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Provider setup", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Link test videos", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Playback test bench" })).toHaveCount(0);
   await expect(page.getByText("GUMLET_API_KEY, GUMLET_WORKSPACE_ID, GUMLET_SIGNING_SECRET", { exact: true })).toBeVisible();
   const playback = await page.context().request.post("/api/playback", { headers: { Origin: origin }, data: { lessonId, provider: "GUMLET" } });
   expect(playback.status()).toBe(403);
@@ -170,16 +161,16 @@ test("Out-of-band admin grants unlock tools without bypassing enrollment or miss
   const verify = await page.context().request.post("/api/admin/providers/GUMLET/verify", { headers: { Origin: origin }, data: {} });
   expect(verify.status()).toBe(503);
   expect((await verify.json()).error.code).toBe("CONFIGURATION_REQUIRED");
-  const imported = await page.context().request.post("/api/admin/videos/import", { headers: { Origin: origin }, data: { provider: "GUMLET", title: "Test", sourceUrl: "https://unapproved.example.test/video.mp4" } });
-  expect(imported.status()).toBe(403);
-  expect((await imported.json()).error.code).toBe("SOURCE_HOST_NOT_ALLOWED");
+  const linking = await page.context().request.post("/api/admin/videos", { headers: { Origin: origin }, data: { provider: "GUMLET", lessonId, assetId: "6192269e0822a81d955d1a4b", expectedAssetId: null } });
+  expect(linking.status()).toBe(503);
+  expect((await linking.json()).error.code).toBe("CONFIGURATION_REQUIRED");
 });
 
 test("Student browser navigation to admin redirects without rendering privileged data", async ({ page }) => {
   await signUp(page.context().request);
   await page.goto("/admin");
   await expect(page).toHaveURL(/\/dashboard$/);
-  await expect(page.getByRole("heading", { name: "Your video library" })).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: "Link test videos" })).toHaveCount(0);
 });
 
 test("Actual Better Auth sign-in rate limit denies the fourth rapid attempt", async ({ request }) => {
@@ -211,29 +202,15 @@ test("Real signup, signout, and password login establish and revoke database ses
   expect((await enrollmentDenied.json()).error.code).toBe("NOT_ENROLLED");
 });
 
-test("Owned progress and measurement routes persist monotonically against actual PostgreSQL", async ({ request }) => {
+test("Owned test observations persist and revoked enrollment blocks later measurements", async ({ request }) => {
   const account = await signUp(request);
   await request.post("/api/enrollments", { headers: { Origin: origin }, data: { courseId } });
   const prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString: "postgresql://postgres@127.0.0.1:15438/postgres?sslmode=disable", max: 1 }) });
   const attemptId = randomUUID();
   try {
     // Explicit test-only database fixtures. No runtime provider API or playback
-    // is substituted; this exercises owned persistence routes, not live media.
-    const videoMapping = await prisma.lessonVideo.upsert({ where: { lessonId_provider: { lessonId, provider: "GUMLET" } }, create: { lessonId, provider: "GUMLET", assetId: "6192269e0822a81d955d1a4b" }, update: {} });
-    await prisma.playbackAttempt.create({ data: { id: attemptId, userId: account.user.id, lessonId, provider: "GUMLET", assetId: videoMapping.assetId, assetMappedAt: videoMapping.updatedAt, purpose: "lesson", issuanceMs: 1, durationSeconds: 180, expiresAt: new Date(Date.now() + 300_000) } });
-    let sequence = 0;
-    const update = (positionSeconds: number) => request.post("/api/progress", { headers: { Origin: origin }, data: { lessonId, attemptId, sequence: ++sequence, positionSeconds } });
-    expect((await update(175)).status()).toBe(200);
-    const concurrent = await Promise.all([update(25), update(40)]);
-    expect(concurrent.every((response) => response.status() === 200)).toBe(true);
-    const progress = await prisma.lessonProgress.findUniqueOrThrow({ where: { userId_lessonId: { userId: account.user.id, lessonId } } });
-    expect(progress.completed).toBe(true);
-    expect(progress.percent).toBeGreaterThanOrEqual(95);
-    expect(progress.positionSeconds).toBe(40);
-    const delayed = await request.post("/api/progress", { headers: { Origin: origin }, data: { lessonId, attemptId, sequence: 2, positionSeconds: 179 } });
-    expect(delayed.status()).toBe(200);
-    expect((await delayed.json()).saved).toBe(false);
-    expect((await prisma.lessonProgress.findUniqueOrThrow({ where: { userId_lessonId: { userId: account.user.id, lessonId } } })).positionSeconds).toBe(40);
+    // is substituted; this exercises owned measurements, not live media.
+    await prisma.playbackAttempt.create({ data: { id: attemptId, userId: account.user.id, lessonId, provider: "GUMLET", purpose: "comparison", issuanceMs: 1, durationSeconds: 180, expiresAt: new Date(Date.now() + 300_000) } });
     const metric = (data: Record<string, unknown>) => request.post(`/api/measurements/${attemptId}`, { headers: { Origin: origin }, data });
     expect((await metric({ outcome: "playing", firstFrameMs: 250, readyMs: 100, tokenRequestMs: 50 })).status()).toBe(200);
     expect((await metric({ outcome: "ready", readyMs: 999 })).status()).toBe(200);
@@ -242,12 +219,11 @@ test("Owned progress and measurement routes persist monotonically against actual
     expect(observed.readyMs).toBe(100);
     expect(observed.firstFrameMs).toBe(250);
     await prisma.enrollment.delete({ where: { userId_courseId: { userId: account.user.id, courseId } } });
-    const revoked = await update(60);
+    const revoked = await metric({ outcome: "ready", readyMs: 100 });
     expect(revoked.status()).toBe(403);
     expect((await revoked.json()).error.code).toBe("NOT_ENROLLED");
   } finally {
     await prisma.playbackAttempt.deleteMany({ where: { id: attemptId } });
-    await prisma.lessonVideo.deleteMany({ where: { lessonId, provider: "GUMLET" } });
     await prisma.$disconnect();
   }
 });
@@ -274,10 +250,11 @@ test("Secure VDO Streaming home is a small dual-provider test bench, with an unc
 test("Paired lesson mappings are preferred but missing credentials never unlock a run", async ({ page }) => {
   await signUp(page.context().request);
   await page.context().request.post("/api/enrollments", { headers: { Origin: origin }, data: { courseId } });
-  const pairedLessonId = "cwh-web-development-lesson-2";
+  const pairedLessonId = `paired-${randomUUID()}`;
   const prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString: "postgresql://postgres@127.0.0.1:15438/postgres?sslmode=disable", max: 1 }) });
   try {
     // Test-only persistence fixtures; no provider request or stream is mocked.
+    await prisma.lesson.create({ data: { id: pairedLessonId, courseId, title: "Second isolated test video", description: "Test fixture", module: "Test", position: 2, estimatedSeconds: 0 } });
     await prisma.lessonVideo.createMany({ data: [
       { lessonId: pairedLessonId, provider: "GUMLET", assetId: "6192269e0822a81d955d1a4b" },
       { lessonId: pairedLessonId, provider: "BUNNY", assetId: randomUUID() },
@@ -288,41 +265,54 @@ test("Paired lesson mappings are preferred but missing credentials never unlock 
     await expect(page.getByText(/Both providers need private server credentials/)).toBeVisible();
     await expect(page.locator("iframe")).toHaveCount(0);
   } finally {
-    await prisma.lessonVideo.deleteMany({ where: { lessonId: pairedLessonId } });
+    await prisma.lesson.deleteMany({ where: { id: pairedLessonId } });
     await prisma.$disconnect();
   }
 });
 
-test("Comparison/legacy/changed-mapping attempts cannot alter lesson progress", async ({ request }) => {
+test("Removed LMS/import APIs cannot alter historical learner data", async ({ request }) => {
   const account = await signUp(request);
-  await request.post("/api/enrollments", { headers: { Origin: origin }, data: { courseId } });
   const prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString: "postgresql://postgres@127.0.0.1:15438/postgres?sslmode=disable", max: 1 }) });
-  const attemptIds: string[] = [];
   try {
-    const mapping = await prisma.lessonVideo.create({ data: { lessonId, provider: "GUMLET", assetId: "6192269e0822a81d955d1a4b" } });
     const savedProgress = await prisma.lessonProgress.create({ data: { userId: account.user.id, lessonId, positionSeconds: 45, durationSeconds: 180, percent: 25 } });
-    const common = { userId: account.user.id, lessonId, provider: "GUMLET" as const, issuanceMs: 1, durationSeconds: 180, expiresAt: new Date(Date.now() + 300_000) };
-    const comparison = await prisma.playbackAttempt.create({ data: { ...common, assetId: mapping.assetId, assetMappedAt: mapping.updatedAt, purpose: "comparison" } });
-    const legacy = await prisma.playbackAttempt.create({ data: common });
-    const original = await prisma.playbackAttempt.create({ data: { ...common, assetId: mapping.assetId, assetMappedAt: mapping.updatedAt, purpose: "lesson" } });
-    attemptIds.push(comparison.id, legacy.id, original.id);
-    const update = (attemptId: string) => request.post("/api/progress", { headers: { Origin: origin }, data: { lessonId, attemptId, sequence: 1, positionSeconds: 170 } });
-    const comparisonDenied = await update(comparison.id);
-    expect(comparisonDenied.status()).toBe(403);
-    expect((await comparisonDenied.json()).error.code).toBe("COMPARISON_PROGRESS_DISABLED");
-    const legacyDenied = await update(legacy.id);
-    expect(legacyDenied.status()).toBe(403);
-    expect((await legacyDenied.json()).error.code).toBe("PLAYBACK_SESSION_EXPIRED");
-    // A -> B -> A must not restore the authority of the original A attempt.
-    await prisma.lessonVideo.update({ where: { id: mapping.id }, data: { assetId: "aaaaaaaaaaaaaaaaaaaaaaaa", updatedAt: new Date(mapping.updatedAt.getTime() + 1) } });
-    await prisma.lessonVideo.update({ where: { id: mapping.id }, data: { assetId: mapping.assetId, updatedAt: new Date(mapping.updatedAt.getTime() + 2) } });
-    const revisionDenied = await update(original.id);
-    expect(revisionDenied.status()).toBe(409);
-    expect((await revisionDenied.json()).error.code).toBe("PLAYBACK_CONFIGURATION_CHANGED");
+    for (const path of ["/api/progress", "/api/admin/videos/import", "/api/admin/videos/catalog"]) {
+      const response = await request.post(path, { headers: { Origin: origin }, data: { lessonId, positionSeconds: 170, provider: "GUMLET" } });
+      expect(response.status()).toBe(404);
+    }
     expect(await prisma.lessonProgress.findUnique({ where: { id: savedProgress.id } })).toEqual(savedProgress);
+  } finally { await prisma.$disconnect(); }
+});
+
+test("Old course URLs redirect to the test bench instead of an LMS", async ({ page }) => {
+  await signUp(page.context().request);
+  for (const path of ["/courses", "/courses/web-development-foundations", `/courses/web-development-foundations/lessons/${lessonId}`]) {
+    await page.goto(path);
+    await expect(page).toHaveURL(/\/dashboard$/);
+    await expect(page.getByRole("heading", { name: "Secure course-video streaming", exact: true })).toBeVisible();
+    await expect(page.getByRole("progressbar")).toHaveCount(0);
+    await expect(page.getByRole("navigation", { name: "Main navigation" }).getByRole("link", { name: "Test courses" })).toHaveCount(0);
+  }
+});
+
+test("Closed or unpublished course access stays blocked in the compact workflow", async ({ page }) => {
+  await signUp(page.context().request);
+  await page.context().request.post("/api/enrollments", { headers: { Origin: origin }, data: { courseId } });
+  await page.goto("/dashboard");
+  await page.getByLabel("Test course", { exact: true }).selectOption("cwh-python-essentials");
+  await expect(page.getByRole("button", { name: "Enroll for testing", exact: true })).toBeDisabled();
+  const denied = await page.context().request.post("/api/enrollments", { headers: { Origin: origin }, data: { courseId: "cwh-python-essentials" } });
+  expect(denied.status()).toBe(403);
+  expect((await denied.json()).error.code).toBe("ENROLLMENT_CLOSED");
+  const prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString: "postgresql://postgres@127.0.0.1:15438/postgres?sslmode=disable", max: 1 }) });
+  try {
+    await prisma.course.update({ where: { id: "cwh-python-essentials" }, data: { published: false } });
+    await page.reload();
+    await expect(page.getByLabel("Test course", { exact: true }).getByRole("option", { name: "Enrollment-denial test course" })).toHaveCount(0);
+    const unpublished = await page.context().request.post("/api/enrollments", { headers: { Origin: origin }, data: { courseId: "cwh-python-essentials" } });
+    expect(unpublished.status()).toBe(404);
+    await expect(page.getByRole("button", { name: "Test without enrollment" })).toBeDisabled();
   } finally {
-    await prisma.playbackAttempt.deleteMany({ where: { id: { in: attemptIds } } });
-    await prisma.lessonVideo.deleteMany({ where: { lessonId, provider: "GUMLET" } });
+    await prisma.course.update({ where: { id: "cwh-python-essentials" }, data: { published: true } });
     await prisma.$disconnect();
   }
 });

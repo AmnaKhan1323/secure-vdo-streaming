@@ -15,11 +15,13 @@
 - [x] Scope corrected for codewithharry.com: comparison-first small streaming prototype, no additional curricula on preview restart. Revalidated 61 offline + 15 production browser/API tests, types/lint/build, and clean audit; existing signed-in session/data preserved.
 - [x] Renamed product to Secure VDO Streaming, wrote easy usage/gaps documentation, and completed pending hardening: 77 offline + 16 E2E tests, strict types/lint/build, clean audit; four live checks remain skipped without credentials.
 - [x] Published reviewed source to public AmnaKhan1323/secure-vdo-streaming, preserving the starter commit; private files excluded. GitHub Actions verification passed for implementation commit 15ddf16.
+- [x] Trimmed to the minimal comparator: removed LMS pages/progress, URL imports/catalog, and duplicate admin player. Retained both providers and secure access; validated 81 offline + 18 production browser/API tests, build/types/lint/audit. Live provider checks remain credential-gated.
 
 ## Development rules
 
 - The app's name is Secure VDO Streaming (renamed at the user's request). Its original evaluation target is codewithharry.com, not automatic website/identity integration. Keep public product branding neutral, preserve legacy IDs, and never claim official media, catalogue, instructor, or website integration without authorization/configuration.
 - Scope is a small Gumlet/Bunny secure-course-video comparison prototype, not a new LMS. Put the dual-provider test bench first; do not expand curricula or add unrelated platform features.
+- Current scope excludes course marketing/search/curriculum screens, learner-progress writes, URL imports/catalog browsing, and a duplicate admin test bench. Enrollment belongs on the comparison screen; provider setup only verifies policy and links real IDs. Preserve historical tables/records and legacy URL redirects.
 - Preserve existing users, session secrets, enrollments, progress, video mappings, and course/lesson identities. New Python/DSA curricula must use new IDs, not overwrite unrelated existing courses.
 - Work in the existing project root; do not create another project folder or generate media without a request. Keep communication concise.
 - Preserve the calm dark blue/violet EdTech design, clear navigation, accessible states, and low motion.
@@ -29,7 +31,7 @@
 - Every playback issuance checks a fresh user/session, enrollment (including admins), asset scope/readiness, explicit effective protection, approved domains, and download/media-token controls. Revalidate after upstream calls and retain enrollment locks at commit.
 - Follow the official provider links in README. Gumlet iframe HMAC-SHA1 signs relative path/query plus Unix-second signed_expires; Bunny embed SHA-256 signs key + videoId + Unix-second expiry. Never substitute direct CDN/DRM algorithms.
 - Gumlet key encodings are explicit, never guessed. Unknown effective asset signing/format, MP4 exposure, broader remote domains, or Bunny token-bypass rules fail closed. Do not invent provider update fields or Bunny fetch GUIDs.
-- Only whitelisted provider DTOs reach clients. Strict bounded JSON, same-origin mutations, no-store responses, owned measurements, and transaction-safe progress must be preserved.
+- Only whitelisted provider DTOs reach clients. Strict bounded JSON, same-origin mutations, no-store responses, and owned measurements must be preserved. No runtime route may write historical learner progress.
 - SDK lifecycle uses exact iframe source/origin guards. Iframe load, ready, advancing-time playback, and application expiry are different observations. No fabricated performance/rejection claims.
 
 ## Commands and verification

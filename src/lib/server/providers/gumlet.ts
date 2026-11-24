@@ -60,21 +60,10 @@ export class GumletAdapter {
   async getAsset(id: string) {
     assetIdSchema.parse(id);
     const asset = await this.request(`/video/assets/${id}`, assetSchema);
+    if (asset.asset_id.toLowerCase() !== id.toLowerCase()) throw new AppError("ASSET_ID_MISMATCH", "Gumlet returned a different asset than requested.", 502);
     if (asset.workspace_id !== this.credentials.workspaceId) throw new AppError("ASSET_SCOPE_MISMATCH", "The Gumlet asset is not in the configured workspace.", 403);
     if (asset.video_protection?.signed_url === false) throw new AppError("UNPROTECTED_ASSET", "Signed playback is disabled for this Gumlet asset.", 503);
     return this.toAsset(asset);
-  }
-
-  async listAssets(page = 1) {
-    const response = await this.request(`/video/assets/list/${this.credentials.workspaceId}?page_number=${page}&page_size=20&sortBy=created_at&orderBy=desc`, z.object({ all_assets: z.array(assetSchema), total_asset_count: z.number().int().nonnegative() }));
-    return { assets: response.all_assets.map((asset) => this.toAsset(asset)), total: response.total_asset_count, page, pageSize: 20 };
-  }
-
-  async importVideo(title: string, sourceUrl: string) {
-    const response = await this.request("/video/assets", z.object({ asset_id: assetIdSchema, status: z.string() }), {
-      workspace_id: this.credentials.workspaceId, input: sourceUrl, title, format: "ABR", mp4_access: false,
-    });
-    return { assetId: response.asset_id, status: response.status, message: "Gumlet accepted the video. Wait for processing, then link it to a lesson from the provider catalog." };
   }
 
   async getProtection(): Promise<ProtectionReport> {

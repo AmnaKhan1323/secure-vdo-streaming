@@ -34,13 +34,6 @@ input:-webkit-autofill { -webkit-text-fill-color: #f1f3fc; box-shadow: 0 0 0 100
   .eyebrow { @apply text-[10px] font-semibold uppercase tracking-[0.18em] text-muted; }
 }
 
-.course-cover { position: relative; overflow: hidden; background: linear-gradient(135deg, #242144, #181b30); }
-.course-cover[data-accent="blue"] { background: linear-gradient(135deg, #172d48, #162035); }
-.course-cover[data-accent="teal"] { background: linear-gradient(135deg, #163c3b, #182731); }
-.course-cover::before { content: ""; position: absolute; width: 200px; height: 200px; border: 1px solid #ffffff0d; border-radius: 50%; right: -35px; top: -95px; }
-.course-cover::after { content: ""; position: absolute; width: 240px; height: 240px; border: 1px solid #ffffff0a; border-radius: 50%; right: -55px; top: -115px; }
-.hero-panel { background: linear-gradient(110deg, #211d3a 0%, #171c30 65%, #151e32 100%); }
-
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
 }

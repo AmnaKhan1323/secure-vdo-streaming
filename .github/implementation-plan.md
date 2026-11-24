@@ -1,8 +1,8 @@
 # Secure video streaming implementation plan
 
-Target website: **codewithharry.com**, confirmed by the user on 2026-11-24. The product identity is CodeWithHarry; StreamLab was the initial prototype name.
+Target website: **codewithharry.com**, confirmed by the user on 2026-11-24. The current product is **Secure VDO Streaming**; CodeWithHarry and StreamLab references below are historical.
 
-Latest user request: rename the product **Secure VDO Streaming**, add an easy step-by-step README and explicit user-owned gaps, then publish a **public** repository under amnakhan1323. Historical brand references below are implementation history; do not relabel existing course/lesson/session identities.
+Latest user request: remove nonessential functionality from the small dual-provider streaming prototype. Retain the short interactive README and authorized **public** publication under amnakhan1323. Historical brand references below are implementation history; do not relabel existing course/lesson/session identities.
 
 Repository inspection: the workspace was empty on 2026-11-24. Node.js 24 and npm are installed; PostgreSQL and Docker are not on PATH. No provider credentials were present or requested through chat.
 
@@ -85,3 +85,22 @@ User requested all actionable remaining work; keep the prototype small and never
 - [x] Stage only project source/docs/config; reviewed all 120 staged files and secret-safe scan; private environment/local data, generated code, dependencies, build/test outputs, and unrelated files excluded.
 - [x] Publish to the public amnakhan1323/secure-vdo-streaming repository using the authorized account. Preserve its starter commit; reviewed implementation pushed as 15ddf16 without force.
 - [x] Verify rendered GitHub README and uploaded source. GitHub Actions Verify prototype run 45394986813 completed successfully for implementation commit 15ddf16.
+
+## Final completeness review and short interactive README
+
+- [x] Serialize provider configuration operations, block issuance during changes/partial failures, and provide a safe retry/recovery path.
+- [x] Replace timestamp-only mapping authority with an explicit mapping ID/revision binding; verify upstream asset identity.
+- [x] Bound player SDK setup, clean up partial failures, and expose retry. Progress flushing is superseded by the latest request removing all learning-progress functionality.
+- [x] Clear stale provider reports on edits, reconcile refreshed mapping displays, and close local database resources on startup failure.
+- [x] Replace the long README with a short clickable quick start, expandable setup/checks, and a clear remaining-user checklist; retain technical details in docs.
+- [x] Add regression tests and rerun local build/types/lint/offline/browser/audit checks — 81 offline + 18 E2E passed; publication/preservation tracked below.
+- [ ] Observe GitHub CI separately; do not confuse code completion with credentialed provider/production acceptance.
+
+## Latest request: remove nonessential functionality
+
+- [x] Keep only authentication/enrollment, both real provider players, signed playback/protection checks, test observations, and essential admin policy/manual linking.
+- [x] Remove course marketing/search/curriculum screens, learner progress writes, URL imports/catalog browsing, and the duplicate admin playback bench.
+- [x] Put compact course-enrollment controls on the comparison screen. Keep old course URLs as redirects; preserve all existing database records and identities.
+- [x] Bootstrap only two text-only test containers on a fresh database, not full web/Python/DSA curricula. Existing data is never overwritten or deleted.
+- [x] Validate retained security and minimal workflows, update the short interactive README, and safely restart the same preview. All eight aggregate record counts match the pre-restart baseline; the same signed-in session still authenticates.
+- [ ] Publish reviewed minimal source and separately observe the new GitHub CI run.

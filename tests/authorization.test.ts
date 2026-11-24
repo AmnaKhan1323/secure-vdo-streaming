@@ -9,9 +9,9 @@ function dependencies() {
   const calls: string[] = [];
   const dependency: PlaybackDependencies = {
     viewer: async () => { calls.push("viewer"); return { id: "viewer", name: "Viewer", email: "viewer@example.test", role: "STUDENT" }; },
-    lesson: async () => { calls.push("enrollment"); return { id: "lesson", videos: [{ provider: "GUMLET", assetId: ASSET_ID, updatedAt: new Date(0) }] }; },
+    lesson: async () => { calls.push("enrollment"); return { id: "lesson", videos: [{ id: "mapping", provider: "GUMLET", assetId: ASSET_ID, revision: 1, updatedAt: new Date(0) }] }; },
     revalidate: async () => { calls.push("revalidate"); },
-    settings: async () => ({ enabled: true, ttlSeconds: 300, allowedDomains: ["courses.example.com"], updatedAt: new Date(0) }),
+    settings: async () => ({ enabled: true, ttlSeconds: 300, allowedDomains: ["courses.example.com"], revision: 0, configurationState: "ready", updatedAt: new Date(0) }),
     adapter: () => ({ getAsset: async () => { calls.push("asset"); return protectedAsset(); }, getProtection: async () => { calls.push("protection"); return protectionReport(); }, signEmbed: (id, expiry) => { calls.push("sign"); return signGumletEmbed(id, PUBLIC_EXAMPLE_GUMLET_SECRET, expiry); } }),
     throttle: async () => { calls.push("throttle"); },
     save: async () => { calls.push("save"); },
@@ -65,7 +65,7 @@ test("Missing mappings and disabled providers are explicit, never runtime mock s
   first.dependency.lesson = async () => ({ id: "lesson", videos: [] });
   await assert.rejects(() => issuePlayback(request, input, first.dependency), /link a real provider video/);
   const second = dependencies();
-  second.dependency.settings = async () => ({ enabled: false, ttlSeconds: 300, allowedDomains: [], updatedAt: new Date(0) });
+  second.dependency.settings = async () => ({ enabled: false, ttlSeconds: 300, allowedDomains: [], revision: 0, configurationState: "ready", updatedAt: new Date(0) });
   await assert.rejects(() => issuePlayback(request, input, second.dependency), /enable this provider/);
   assert.equal(first.calls.includes("sign"), false);
   assert.equal(second.calls.includes("sign"), false);

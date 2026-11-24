@@ -1,7 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { metricsSchema, playbackRequestSchema, progressSchema, providerSettingSchema, videoMappingSchema } from "../src/lib/validation";
-import { validateImportUrl } from "../src/lib/server/providers/source-url";
+import { metricsSchema, playbackRequestSchema, providerSettingSchema, videoMappingSchema } from "../src/lib/validation";
 import { nextMeasurementOutcome } from "../src/lib/measurement-state";
 import { conservativeTokenLifetime } from "../src/lib/playback-clock";
 import { trustedPlayerMessage, validTimeUpdate } from "../src/lib/player-messages";
@@ -22,12 +21,12 @@ test("Video mapping validates the provider-specific real ID shape", () => {
   assert.ok(!videoMappingSchema.safeParse({ lessonId: "lesson", provider: "BUNNY", assetId: ASSET_ID }).success);
 });
 
-test("Progress cannot carry client-supplied duration or completion authority", () => {
-  const input = { lessonId: "lesson", attemptId: VIDEO_ID, sequence: 1, positionSeconds: 12 };
-  assert.ok(progressSchema.safeParse(input).success);
-  assert.ok(!progressSchema.safeParse({ ...input, completed: true }).success);
-  assert.ok(!progressSchema.safeParse({ ...input, durationSeconds: 1 }).success);
-  assert.ok(!progressSchema.safeParse({ ...input, positionSeconds: Infinity }).success);
+test("Playback requests support comparison only, with no learner-progress authority", () => {
+  const input = { lessonId: "lesson", provider: "GUMLET" };
+  assert.equal(playbackRequestSchema.parse(input).purpose, "comparison");
+  assert.ok(!playbackRequestSchema.safeParse({ ...input, purpose: "lesson" }).success);
+  assert.ok(!playbackRequestSchema.safeParse({ ...input, completed: true }).success);
+  assert.ok(!playbackRequestSchema.safeParse({ ...input, durationSeconds: 1 }).success);
 });
 
 test("Initial measurements are accepted; playing requires an observed advancing time", () => {
@@ -61,19 +60,4 @@ test("Player messages must match exact origin, iframe source, context, and shape
   assert.ok(!trustedPlayerMessage({ ...message, data: { context: "player.js", event: "invented" } }, "https://play.gumlet.io", source));
   assert.ok(!validTimeUpdate({ seconds: NaN, duration: 2 }));
   assert.ok(!validTimeUpdate({ seconds: 2, duration: 0 }));
-});
-
-test("Imports require approved public HTTPS hosts without inline credentials/query/ports", async () => {
-  const resolver = async () => [{ address: "93.184.216.34", family: 4 }];
-  assert.equal(await validateImportUrl("https://media.example.com/video.mp4", ["media.example.com"], resolver), "https://media.example.com/video.mp4");
-  for (const url of ["http://media.example.com/video.mp4", "https://user:secret@media.example.com/video.mp4", "https://media.example.com/video.mp4?token=secret", "https://media.example.com:444/video.mp4", "https://unapproved.example.com/video.mp4"]) {
-    await assert.rejects(() => validateImportUrl(url, ["media.example.com"], resolver));
-  }
-  await assert.rejects(() => validateImportUrl("https://media.example.com/video.mp4", [], resolver));
-});
-
-test("Private, loopback, mapped IPv6, and link-local import resolutions are blocked", async () => {
-  for (const address of ["127.0.0.1", "10.0.0.1", "192.168.1.1", "169.254.169.254", "::1", "::ffff:127.0.0.1", "fe80::1"]) {
-    await assert.rejects(() => validateImportUrl("https://media.example.com/video.mp4", ["media.example.com"], async () => [{ address, family: address.includes(":") ? 6 : 4 }]));
-  }
 });

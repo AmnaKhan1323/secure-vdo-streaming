@@ -4,7 +4,9 @@ import { requireAdminIdentity, revalidateIdentity } from "@/lib/server/authoriza
 import { db } from "@/lib/server/db";
 import { assertSameOrigin, handleApiError, json, rateLimit, readJson } from "@/lib/server/http";
 import { providerAdapter } from "@/lib/server/providers";
-import { assertSessionActive, lockIdentity } from "@/lib/server/commit-access";
+import { beginProviderOperation, assertProviderOperation, finishProviderOperation, failProviderOperation } from "@/lib/server/provider-configuration";
+import { assertProviderPolicy } from "@/lib/server/providers/policy";
+import { appOrigin } from "@/lib/server/env";
 
 export const runtime = "nodejs";
 export async function PUT(request: Request, context: { params: Promise<{ provider: string }> }) {
@@ -17,13 +19,19 @@ export async function PUT(request: Request, context: { params: Promise<{ provide
     if (!providerResult.success) throw new AppError("INVALID_REQUEST", "Unknown video provider.");
     const provider = providerResult.data;
     const input = await readJson(request, providerSettingSchema);
-    const report = input.applyRemote ? await providerAdapter(provider).applyProtection(input.allowedDomains, () => revalidateIdentity(request, identity, true)) : null;
-    const setting = await db().$transaction(async (transaction) => {
-      const sessionExpiresAt = await lockIdentity(transaction, identity, true);
-      const updated = await transaction.providerSetting.upsert({ where: { provider }, create: { provider, enabled: input.enabled, ttlSeconds: input.ttlSeconds, allowedDomains: input.allowedDomains }, update: { enabled: input.enabled, ttlSeconds: input.ttlSeconds, allowedDomains: input.allowedDomains } });
-      assertSessionActive(sessionExpiresAt);
-      return updated;
-    });
-    return json({ setting: { provider: setting.provider, enabled: setting.enabled, ttlSeconds: setting.ttlSeconds, allowedDomains: setting.allowedDomains }, report });
+    const operation = await beginProviderOperation(db(), identity, provider, input.expectedRevision);
+    try {
+      const authorize = async () => { await revalidateIdentity(request, identity, true); await assertProviderOperation(db(), provider, operation); };
+      const report = input.applyRemote
+        ? await providerAdapter(provider).applyProtection(input.allowedDomains, authorize)
+        : operation.requiresVerification && input.enabled ? await providerAdapter(provider).getProtection() : null;
+      if (report && input.enabled) assertProviderPolicy(report, new URL(appOrigin()).hostname, input.allowedDomains);
+      const setting = await finishProviderOperation(db(), identity, provider, operation, { enabled: input.enabled, ttlSeconds: input.ttlSeconds, allowedDomains: input.allowedDomains });
+      return json({ setting: { provider: setting.provider, enabled: setting.enabled, ttlSeconds: setting.ttlSeconds, allowedDomains: setting.allowedDomains, revision: setting.revision, configurationState: setting.configurationState }, report });
+    } catch (error) {
+      // If cleanup fails or the process crashes, "updating" remains fail-closed.
+      try { await failProviderOperation(db(), provider, operation); } catch { console.error("[streamlab] provider operation cleanup failed"); }
+      throw error;
+    }
   } catch (error) { return handleApiError(error); }
 }

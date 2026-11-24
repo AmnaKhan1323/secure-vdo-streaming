@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { FEATURED_COURSE_IDS, SITE, featuredCourses } from "../src/lib/site";
-import { sampleCourses } from "../src/lib/sample-curriculum";
+import { SITE } from "../src/lib/site";
+import { testCourses } from "../prisma/test-courses";
 import { domainMatches, assertPlaybackPolicy } from "../src/lib/server/providers/policy";
 import { protectedAsset, protectionReport } from "./fixtures";
 
@@ -15,19 +15,10 @@ test("Product identity is Secure VDO Streaming and target domains grant no impli
   assert.doesNotThrow(() => assertPlaybackPolicy({ ...protectionReport(), allowedDomains: ["codewithharry.com", "www.codewithharry.com"] }, protectedAsset(), "www.codewithharry.com", ["codewithharry.com", "www.codewithharry.com"]));
 });
 
-test("New coding curricula have independent identities and no assumed videos/instructors", () => {
-  assert.deepEqual(sampleCourses.map((course) => course.id), [...FEATURED_COURSE_IDS]);
-  assert.equal(sampleCourses.reduce((sum, course) => sum + course.lessons.length, 0), 13);
-  assert.ok(sampleCourses.every((course) => course.id.startsWith("cwh-") && !course.id.startsWith("course-")));
-  assert.ok(sampleCourses.every((course) => course.instructor === "Instructor to be assigned"));
-  assert.ok(sampleCourses.every((course) => !("videos" in course) && course.lessons.every((lesson) => !("assetId" in lesson))));
-});
-
-test("Featured coding courses are prioritized without mutating or hiding old content", () => {
-  const original = [{ id: "course-fullstack" }, { id: FEATURED_COURSE_IDS[2] }, { id: "operator-course" }, { id: FEATURED_COURSE_IDS[0] }, { id: FEATURED_COURSE_IDS[1] }];
-  const order = original.map((course) => course.id);
-  assert.deepEqual(featuredCourses(original).map((course) => course.id), [...FEATURED_COURSE_IDS]);
-  assert.deepEqual(original.map((course) => course.id), order);
-  assert.equal(featuredCourses(original, original.length).length, original.length);
-  assert.equal(featuredCourses(original, original.length).at(-1)?.id, "operator-course");
+test("Fresh setup has two text-only streaming/access fixtures, not full curricula or media", () => {
+  assert.equal(testCourses.length, 2);
+  assert.equal(testCourses.reduce((sum, course) => sum + course.lessons.length, 0), 2);
+  assert.ok(testCourses.every((course) => course.learningOutcomes.length === 0 && course.instructor === "Not assigned"));
+  assert.ok(testCourses.every((course) => !("videos" in course) && course.lessons.every((lesson) => !("assetId" in lesson))));
+  assert.equal(testCourses.filter((course) => course.openEnrollment).length, 1);
 });

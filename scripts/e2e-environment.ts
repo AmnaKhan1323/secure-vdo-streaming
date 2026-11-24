@@ -1,7 +1,7 @@
 export const ISOLATED_PROVIDER_VARIABLES = [
   "GUMLET_API_KEY", "GUMLET_WORKSPACE_ID", "GUMLET_SIGNING_SECRET",
   "BUNNY_STREAM_API_KEY", "BUNNY_LIBRARY_ID", "BUNNY_TOKEN_AUTH_KEY", "BUNNY_CORE_API_KEY",
-  "VIDEO_IMPORT_ALLOWED_HOSTS", "LIVE_GUMLET_ASSET_ID", "LIVE_BUNNY_VIDEO_ID",
+  "LIVE_GUMLET_ASSET_ID", "LIVE_BUNNY_VIDEO_ID",
 ] as const;
 
 export function isolatedTestEnvironment(base: NodeJS.ProcessEnv, databaseUrl: string, secret: string): NodeJS.ProcessEnv {

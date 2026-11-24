@@ -4,17 +4,17 @@
 
 Start on the signed-in **Video comparison** screen. Both Gumlet and Bunny slots are visible; select an enrolled test lesson linked to both real providers. Paired lessons are prioritized, and the paired-run button requires both mappings and configured/enabled providers. No video is invented if those prerequisites are missing.
 
-Use **Test courses** only for sample course enrollment and the existing per-provider lesson view. Use admin **Provider setup** for credentials-status checks, real catalog/import/linking, and protection settings. The prototype is not connected to official codewithharry.com identities, paid entitlements, or course media.
+Use **Course access** directly on the comparison screen for enrollment. Use admin **Provider setup** for credentials-status checks, manual verified video linking, and protection settings. Uploads/catalog management stay in the provider consoles. The prototype is not connected to official codewithharry.com identities, paid entitlements, or course media.
 
 The authentication/enrollment probe buttons call **both provider paths** and accept a pass only when both return the expected status and error code without a playback URL. Comparison attempts record diagnostics only; they cannot change lesson progress. The original provider acceptance checks below remain required after private configuration.
 
 ## What automated checks establish
 
 - Cryptographic fixed vectors match the official published algorithm inputs/encodings. They are test-derived constants, not vendor-issued certification.
-- HTTP contract fixtures verify documented paths/methods/headers, output schemas, and secret-free DTOs. Runtime always uses actual provider APIs.
+- HTTP contract fixtures verify documented asset/protection paths, methods, headers, and secret-free DTOs. Runtime always uses actual provider APIs.
 - Unauthorized viewers, missing enrollment, revoked authorization, unsafe requests, unknown protection, extra domains, and MP4 exposure fail closed.
 - Commit locks recheck identity/session, enrollment, mapping revision, and provider policy after remote work; changed local state prevents stale issuance. Session expiry is checked again after lock waits/writes.
-- Ordered lesson progress rejects legacy/unbound/comparison/expired/replaced-asset attempts and delayed sequences; existing saved progress and completion are preserved.
+- Learner-progress/import/catalog APIs are retired and unavailable; historical course/progress data is preserved. Tests verify the retained app cannot mutate that progress through removed routes.
 - Real PostgreSQL/WASM migration/Prisma adapter tests establish schema/seed behavior; native PostgreSQL still needs deployment verification.
 - End-to-end tests run the built application with real Better Auth/Prisma, not mocked sessions or routes.
 - A successful production build is separate from successful live provider playback.
@@ -66,7 +66,7 @@ Already-expired/tampered admin probes keep the real iframe mounted to observe pr
 - Review existing referrers. Remote-apply only adds them; extra unapproved hostnames block app playback until reconciled.
 - Inspect Pull Zone rules for token-auth bypasses and existing generated MP4/original exposure.
 - Omitted/null edge rules or early-play state are unknown, not safe defaults; unknown key/protection state blocks playback.
-- Bunny remote URL fetch returns a status model, not a documented video GUID. Correlate by explicitly selecting the actual resulting catalog entry.
+- Upload the authorized video in Bunny's console and copy its actual GUID for manual linking. The comparator does not implement imports or invent video IDs.
 
 ## Performance interpretation
 

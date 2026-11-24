@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { BookOpen, FlaskConical, Menu, Settings2, ShieldCheck, X } from "lucide-react";
+import { FlaskConical, Menu, Settings2, ShieldCheck, X } from "lucide-react";
 import { Brand } from "./brand";
 import { cn } from "@/lib/utils";
 import { SITE } from "@/lib/site";
@@ -17,7 +17,7 @@ export function Sidebar({ isAdmin }: { isAdmin: boolean }) {
     document.addEventListener("keydown", escape);
     return () => document.removeEventListener("keydown", escape);
   }, [open]);
-  const mainLinks = [{ href: "/dashboard", name: "Video comparison", icon: FlaskConical }, { href: "/courses", name: "Test courses", icon: BookOpen }];
+  const mainLinks = [{ href: "/dashboard", name: "Video comparison", icon: FlaskConical }];
   return <>
     <button onClick={() => setOpen(true)} className="fixed left-4 top-4 z-30 flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-surface lg:hidden" aria-label="Open navigation" aria-expanded={open} aria-controls="workspace-navigation"><Menu size={18} /></button>
     {open && <button className="fixed inset-0 z-40 bg-black/70 lg:hidden" aria-label="Close navigation" onClick={() => setOpen(false)} />}

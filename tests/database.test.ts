@@ -3,23 +3,23 @@ import { test } from "node:test";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "../src/generated/prisma/client";
 import { startLocalDatabase } from "../scripts/local-db";
-import { seed, sampleCourses } from "../prisma/seed";
+import { seed, testCourses } from "../prisma/seed";
 
-test("Real PostgreSQL/WASM migration, Prisma adapter, and idempotent curriculum seed", async () => {
+test("Real PostgreSQL/WASM migration, minimal seed, and historical data preservation", async () => {
   const local = await startLocalDatabase("memory://", 15437);
   const prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString: local.url, max: 1 }) });
   const administration = new PrismaClient({ adapter: new PrismaPg({ connectionString: local.url, max: 1 }) });
   try {
     await seed(prisma);
     await seed(prisma);
-    assert.equal(await prisma.course.count(), 3);
-    assert.equal(await prisma.lesson.count(), 13);
+    assert.equal(await prisma.course.count(), 2);
+    assert.equal(await prisma.lesson.count(), 2);
     assert.equal(await prisma.user.count(), 0);
     assert.equal(await prisma.lessonVideo.count(), 0);
     assert.equal(await prisma.enrollment.count(), 0);
     assert.equal(await prisma.providerSetting.count({ where: { enabled: true } }), 0);
     const course = await prisma.course.findUniqueOrThrow({ where: { id: "cwh-web-development" } });
-    assert.equal(course.learningOutcomes.length, 4);
+    assert.equal(course.learningOutcomes.length, 0);
     await prisma.$transaction(async (transaction) => {
       await transaction.user.create({ data: { id: "test-user", name: "Fixture", email: "fixture@example.test" } });
       await transaction.enrollment.create({ data: { userId: "test-user", courseId: course.id } });
@@ -63,7 +63,7 @@ test("Real PostgreSQL/WASM migration, Prisma adapter, and idempotent curriculum 
     const savedMapping = await prisma.lessonVideo.create({ data: { lessonId: legacyLesson.id, provider: "GUMLET", assetId: "6192269e0822a81d955d1a4b" } });
     const savedSetting = await prisma.providerSetting.update({ where: { provider: "GUMLET" }, data: { enabled: true, ttlSeconds: 120, allowedDomains: ["www.codewithharry.com"] } });
     // Operator-owned edits to an already-present new sample are also preserved.
-    await prisma.course.update({ where: { id: sampleCourses[0].id }, data: { title: "Operator-edited web curriculum" } });
+    await prisma.course.update({ where: { id: testCourses[0].id }, data: { title: "Operator-owned test course" } });
     await seed(prisma);
     await seed(prisma);
     assert.deepEqual(await prisma.course.findUnique({ where: { id: legacyCourse.id } }), legacyCourse);
@@ -73,8 +73,8 @@ test("Real PostgreSQL/WASM migration, Prisma adapter, and idempotent curriculum 
     assert.deepEqual(await prisma.providerSetting.findUnique({ where: { provider: "GUMLET" } }), savedSetting);
     assert.equal(await prisma.enrollment.count({ where: { userId: "preserved-user", courseId: legacyCourse.id } }), 1);
     assert.equal((await prisma.user.findUniqueOrThrow({ where: { id: "preserved-user" } })).role, "STUDENT");
-    assert.equal((await prisma.course.findUniqueOrThrow({ where: { id: sampleCourses[0].id } })).title, "Operator-edited web curriculum");
-    assert.equal(await prisma.course.count(), 4);
-    assert.equal(await prisma.lesson.count(), 14);
+    assert.equal((await prisma.course.findUniqueOrThrow({ where: { id: testCourses[0].id } })).title, "Operator-owned test course");
+    assert.equal(await prisma.course.count(), 3);
+    assert.equal(await prisma.lesson.count(), 3);
   } finally { await prisma.$disconnect(); await administration.$disconnect(); await local.close(); }
 });

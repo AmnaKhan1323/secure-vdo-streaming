@@ -24,8 +24,8 @@ export const POST = apiRoute(async (request) => {
     const lessons = await transaction.$queryRaw<{ id: string }[]>(Prisma.sql`SELECT "id" FROM "Lesson" WHERE "id" = ${input.lessonId} FOR UPDATE`);
     if (!lessons.length) throw new AppError("NOT_FOUND", "Lesson was removed before linking completed.", 404);
     const current = await transaction.lessonVideo.findUnique({ where: { lessonId_provider: { lessonId: input.lessonId, provider: input.provider } } });
-    if ((current?.assetId ?? null) !== input.expectedAssetId || current?.updatedAt.getTime() !== before?.updatedAt.getTime()) throw new AppError("MAPPING_CONFLICT", "The video mapping changed during verification. Refresh before linking again.", 409);
-    await transaction.lessonVideo.upsert({ where: { lessonId_provider: { lessonId: input.lessonId, provider: input.provider } }, create: { lessonId: input.lessonId, provider: input.provider, assetId: input.assetId }, update: { assetId: input.assetId } });
+    if ((current?.assetId ?? null) !== input.expectedAssetId || current?.id !== before?.id || current?.revision !== before?.revision) throw new AppError("MAPPING_CONFLICT", "The video mapping changed during verification. Refresh before linking again.", 409);
+    await transaction.lessonVideo.upsert({ where: { lessonId_provider: { lessonId: input.lessonId, provider: input.provider } }, create: { lessonId: input.lessonId, provider: input.provider, assetId: input.assetId }, update: current?.assetId === input.assetId ? {} : { assetId: input.assetId, revision: { increment: 1 } } });
     assertSessionActive(sessionExpiresAt);
   });
   return json({ lessonId: input.lessonId, provider: input.provider, asset, message: asset.ready ? "Video linked to the lesson." : "Video linked; playback will remain blocked until processing finishes." });

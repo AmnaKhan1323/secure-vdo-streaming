@@ -14,10 +14,6 @@ export function PageHeading({ eyebrow, title, description, action }: { eyebrow?:
   return <div className="mb-7 flex flex-wrap items-end justify-between gap-4"><div>{eyebrow && <p className="eyebrow mb-2">{eyebrow}</p>}<h1 className="text-2xl font-semibold tracking-tight sm:text-[28px]">{title}</h1><p className="mt-2 text-sm leading-relaxed text-muted">{description}</p></div>{action}</div>;
 }
 
-export function ProgressBar({ value, className }: { value: number; className?: string }) {
-  return <div role="progressbar" aria-valuenow={value} aria-valuemin={0} aria-valuemax={100} aria-label="Course progress" className={cn("h-1.5 overflow-hidden rounded-full bg-[#282c3c]", className)}><div className="h-full rounded-full bg-gradient-to-r from-[#8d75ee] to-[#afa0f8]" style={{ width: `${Math.min(100, Math.max(0, value))}%` }} /></div>;
-}
-
 export function Notice({ children, tone = "info" }: { children: ReactNode; tone?: "info" | "error" | "success" }) {
   return <div role={tone === "error" ? "alert" : "status"} className={cn("rounded-xl border p-3.5 text-xs leading-relaxed", tone === "error" ? "border-rose-500/20 bg-rose-500/5 text-rose-200" : tone === "success" ? "border-emerald-500/20 bg-emerald-500/5 text-emerald-200" : "border-blue-400/15 bg-blue-400/5 text-slate-300")}>{children}</div>;
 }
