@@ -14,6 +14,7 @@
 - [x] Run credential-gated tests: four explicitly skipped without actual credentials/assets; do not claim live provider playback passed.
 - [x] Scope corrected for codewithharry.com: comparison-first small streaming prototype, no additional curricula on preview restart. Revalidated 61 offline + 15 production browser/API tests, types/lint/build, and clean audit; existing signed-in session/data preserved.
 - [x] Renamed product to Secure VDO Streaming, wrote easy usage/gaps documentation, and completed pending hardening: 77 offline + 16 E2E tests, strict types/lint/build, clean audit; four live checks remain skipped without credentials.
+- [x] Published reviewed source to public AmnaKhan1323/secure-vdo-streaming, preserving the starter commit; private files excluded. GitHub Actions verification passed for implementation commit 15ddf16.
 
 ## Development rules
 

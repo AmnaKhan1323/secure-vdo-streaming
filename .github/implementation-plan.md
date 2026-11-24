@@ -82,5 +82,6 @@ User requested all actionable remaining work; keep the prototype small and never
 - [x] User selected public repository visibility; review all source/config/docs before publishing.
 - [x] Finish the already-started hardening tests and pass the production build/browser suite — 77 offline + 16 E2E tests, strict types/lint, clean build/audit; four live checks skipped.
 - [x] Preserve the private preview database/session during additive migrations and restart; existing browser session and all aggregate record counts unchanged.
-- [ ] Stage only project source/docs/config; exclude .env values, .local data, generated code, dependencies, build/test outputs, and unrelated files.
-- [ ] Create amnakhan1323/secure-vdo-streaming and push the reviewed commit using the authorized account.
+- [x] Stage only project source/docs/config; reviewed all 120 staged files and secret-safe scan; private environment/local data, generated code, dependencies, build/test outputs, and unrelated files excluded.
+- [x] Publish to the public amnakhan1323/secure-vdo-streaming repository using the authorized account. Preserve its starter commit; reviewed implementation pushed as 15ddf16 without force.
+- [x] Verify rendered GitHub README and uploaded source. GitHub Actions Verify prototype run 45394986813 completed successfully for implementation commit 15ddf16.

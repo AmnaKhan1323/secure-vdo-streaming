@@ -14,7 +14,8 @@ The app was renamed to **Secure VDO Streaming** at the user's request. The READM
 - Dependency audit: **0 reported vulnerabilities**.
 - New migrations are additive only: attempt asset/purpose/revision binding and progress ordering. Existing attempt history remains readable; new progress requires a fresh asset-bound lesson attempt.
 - The existing local database was backed up in ignored private storage and upgraded in place. Aggregate user/session/course/lesson/enrollment/progress/mapping/attempt counts were unchanged. The signed-in browser still opens the renamed app without reauthentication; no secrets, accounts, roles, or enrollments were replaced.
-- GitHub CI configuration checks types/lint/offline/build/browser behavior without provider secrets. Its remote run must be observed separately; local success is not a claim that GitHub Actions has already passed.
+- GitHub CI run [45394986813](https://github.com/AmnaKhan1323/secure-vdo-streaming/actions/runs/45394986813) completed successfully for implementation commit [15ddf16](https://github.com/AmnaKhan1323/secure-vdo-streaming/commit/15ddf168cf676e1b79196ef882724972eb3fa9f1): clean install, types, lint, 77 offline tests, production build, 16 Chromium browser/API tests, and audit on Ubuntu/Node 24 without provider secrets.
+- Published to the public [AmnaKhan1323/secure-vdo-streaming](https://github.com/AmnaKhan1323/secure-vdo-streaming) repository, preserving its starter history without force push. All 120 staged source/doc/config files were manually reviewed; private environment/local database/session data, generated clients, dependencies, and build/test outputs were excluded.
 
 Earlier records below are historical. The current results above supersede their counts.
 
