@@ -1,13 +1,13 @@
 # Setup and provider reference
 
-Start with the short [README](../README.md). This page holds the detailed configuration, signing, and production notes.
+Start with the [README handover guide](../README.md). This page holds the detailed configuration, signing, and production notes.
 
 ## Local development
 
 Use Node 22.12+ (Node 24 recommended). On Windows use `npm.cmd`; on macOS/Linux use `npm`.
 
 ```powershell
-npm.cmd install
+npm.cmd ci
 npm.cmd run db:generate
 npm.cmd run dev:local
 ```
@@ -31,7 +31,7 @@ Create **.env.local** in your editor using [the template](../.env.example). For 
 | Gumlet | `GUMLET_API_KEY`, `GUMLET_WORKSPACE_ID`, `GUMLET_SIGNING_SECRET` |
 | Bunny | `BUNNY_STREAM_API_KEY`, `BUNNY_LIBRARY_ID`, `BUNNY_TOKEN_AUTH_KEY`, `BUNNY_CORE_API_KEY` |
 
-Gumlet key encodings are explicit: `GUMLET_SIGNING_SECRET_ENCODING` and `GUMLET_REMOTE_SECRET_ENCODING` default to `base64`; choose `hex` only after confirming the representations with Gumlet. Bunny's Stream API key, Core API key, and token authentication key are distinct credentials. `BUNNY_PLAYER_HOST=player.mediadelivery.net` defaults to the current player.
+Gumlet key encodings are explicit: `GUMLET_SIGNING_SECRET_ENCODING` defaults to `base64`; when unset, `GUMLET_REMOTE_SECRET_ENCODING` inherits that local encoding. Choose `hex` only after confirming the representations with Gumlet. Bunny's Stream API key, Core API key, and token authentication key are distinct credentials. `BUNNY_PLAYER_HOST=player.mediadelivery.net` defaults to the current player.
 
 Never put credentials in client code, `NEXT_PUBLIC_*`, video titles, source URLs, screenshots, logs, or chat. Private environment/local data are ignored by Git; the template contains no live credentials. Signed playback URLs are also bearer credentials: do not share or log them.
 
@@ -58,6 +58,8 @@ Official references: [signed URLs](https://docs.gumlet.com/video/manage-videos/v
 5. Current host `player.mediadelivery.net` requires `PlayerVersion=2`. Explicit legacy `iframe.mediadelivery.net` requires version 1 and is scheduled for removal in early 2027.
 6. Save/check the same local hostname/TTL policy in **Provider setup**.
 
+The current adapter verifies `BUNNY_TOKEN_AUTH_KEY` against the linked Pull Zone's returned `ZoneSecurityKey`. A missing/different key fails closed. Confirm that your account's embed/CDN key configuration is compatible with this check; do not assume separate keys are interchangeable or weaken verification without provider-confirmed evidence and tests.
+
 **Exact iframe signature:** SHA-256 hex of `tokenAuthenticationKey + videoId + decimalUnixExpirySeconds`, no separators. URL query is `token`/`expires`; library ID is in the path, not the hash. This is not Bunny's CDN signing algorithm.
 
 Official references: [token authentication](https://bunny.net/docs/stream/token-authentication.md), [signed embeds](https://bunny.net/docs/stream/player/signed-embeds.md), [security layers](https://bunny.net/docs/stream/security.md), [get video](https://bunny.net/docs/api-reference/stream/manage-videos/get-video.md), [library settings](https://bunny.net/docs/api-reference/core/stream-video-library/update-video-library.md), [add referrer](https://bunny.net/docs/api-reference/core/stream-video-library/add-allowed-referer.md), [Pull Zone settings](https://bunny.net/docs/api-reference/core/pull-zone/update-pull-zone.md), [Next.js/player integration](https://bunny.net/docs/stream/player/nextjs.md).
@@ -66,7 +68,7 @@ Official references: [token authentication](https://bunny.net/docs/stream/token-
 
 Enter hostnames without scheme/path/port, for example `localhost` or `courses.example.com`. Empty/unrestricted or broader remote lists are rejected. Gumlet remote-apply replaces its referrer list; Bunny only adds entries, so remove unapproved extras manually or intentionally approve them locally. No signing keys are rotated.
 
-Provider changes are serialized per scope in the app. Before any remote mutation, the local provider is marked **updating and disabled**. Playback commits check mapping/provider revisions, so an older remote report cannot authorize a changed policy. A partial failure stays **failed and disabled**; inspect/fix the provider console and retry Save. Enabling recovery requires a fresh remote report. A crashed operation can be taken over after 10 minutes; an old owner cannot complete or disable its replacement.
+Provider changes are serialized per scope in the app. Before any remote mutation, the local provider is marked **updating and disabled**. Playback commits check mapping/provider revisions, so an older remote report cannot authorize a changed policy. A partial failure stays **failed and disabled** and advances the revision. Inspect/fix the provider console, use **Reload saved settings** or refresh, review/re-enter the intended policy, re-enable playback, and Save. Enabling recovery requires a fresh remote report. A crashed operation can be taken over after 10 minutes; an old owner cannot complete or disable its replacement.
 
 Remote APIs are not transactional. Already-in-flight provider work and changes made directly in a vendor console cannot be atomically undone by this app. Existing signed URLs remain bearer URLs until provider expiry; enrollment revocation prevents new issuance, not instant revocation of old URLs.
 
@@ -79,6 +81,10 @@ Video upload/import/catalog management stays in the vendor consoles. The app onl
 ## Standard PostgreSQL and deployment
 
 Use an existing native/managed PostgreSQL service or the included [Compose configuration](../compose.yaml). Configure `DATABASE_URL`, a random `BETTER_AUTH_SECRET` of at least 32 characters, and the exact `BETTER_AUTH_URL` origin privately. Compose uses user/database `streamlab`; set `POSTGRES_PASSWORD` and use a matching URL-encoded password in the database URL.
+
+For this mode, create **.env** from [the template](../.env.example), or inject real process environment values. Prisma migrations and the standalone seed load **.env**, not automatically **.env.local**. Next.js also supports **.env.local**, but avoid conflicting copies: the local/admin/live helpers and Prisma do not all follow Next.js file precedence, and existing shell variables take precedence. Do not run migration/seed against an unintended database just because the app can connect.
+
+Explicitly set and verify the intended `DATABASE_URL` before migrating. [Prisma configuration](../prisma.config.ts) uses a localhost fallback when the variable is unset, so a migration may try that database instead of failing for missing configuration. The standalone seed and runtime require the URL; generation/build do not need a live database.
 
 ```powershell
 docker compose up -d
@@ -94,11 +100,13 @@ The evaluation target is a **vdo platform**, not an automatic identity/media int
 
 Production also needs trusted proxy headers, native PostgreSQL concurrency verification, backup/retention/monitoring, email verification/recovery/MFA as appropriate, privacy review, and a reviewed nonce-based CSP. The prototype's CSP permits inline hydration scripts/styles; it is not a production certification. No DRM is configured and authorized screen recording cannot be completely prevented.
 
+Production responses also set a one-year HSTS policy with `includeSubDomains`. Review HTTPS readiness for the selected hostname and affected subdomains before serving it; browsers can retain this policy.
+
 ## Tests and troubleshooting
 
-Run `npm.cmd run check` (types, lint, offline tests, build), `npm.cmd run test:e2e`, and `npm.cmd run test:live`. Windows uses installed Edge by default; Linux/macOS use Playwright Chromium (`npx playwright install chromium`). `PLAYWRIGHT_CHANNEL` can override the browser channel. Tests explicitly blank provider keys, never load real credentials or fallback runtime streams.
+Run `npm.cmd run check` (types, lint, offline tests, build), then `npm.cmd run test:e2e`. E2E starts the already-built app with isolated data on ports 3001/15438. Windows uses installed Edge by default; Linux/macOS use Playwright Chromium (`npx playwright install chromium`). To use downloaded Chromium on Windows, set `PLAYWRIGHT_CHANNEL=chromium`; it can also select another installed supported channel. Linux may need `npx playwright install --with-deps chromium`. Offline tests use fixtures and E2E explicitly blanks provider keys; neither substitutes fallback runtime streams.
 
-Live tests require private real credentials and `LIVE_GUMLET_ASSET_ID` / `LIVE_BUNNY_VIDEO_ID`. Optional `LIVE_EMBED_PROBES=true` checks iframe HTTP shell reachability only; HTTP 200 is not playback. Follow [browser acceptance](testing.md), not just automated pass counts.
+Run `npm.cmd run test:live` separately when private real credentials and `LIVE_GUMLET_ASSET_ID` / `LIVE_BUNNY_VIDEO_ID` are available. These read-only real-provider checks skip explicitly without their prerequisites. Optional `LIVE_EMBED_PROBES=true` checks iframe HTTP shell reachability only; HTTP 200 is not playback. Follow [browser acceptance](testing.md), not just automated pass counts.
 
 - Missing keys/mappings: configure server values, restart, and link both real videos.
 - Invalid Gumlet encoding or unverified asset protection: confirm authoritative account/API state; do not weaken the gate.

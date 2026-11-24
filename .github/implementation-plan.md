@@ -120,3 +120,10 @@ User requested all actionable remaining work; keep the prototype small and never
 - [x] Use display-only target metadata, remove default production domains, and keep explicit provider origin/allowlist checks.
 - [x] Preserve the product name, both provider integrations, stored identities, and existing data.
 - [x] Revalidate types/lint/offline/build/browser checks and restart the same-data preview before reviewed publication — 81 offline + 19 browser/API tests, types/lint/build/audit passed; all fresh aggregate counts and the existing session preserved.
+
+## Receiver-facing handover guide
+
+- [x] Expand README into a layered handover covering installation, all private configuration keys, both providers, access roles, architecture/security, routes/source map, tests, troubleshooting, data/ownership/license, and receiver acceptance.
+- [x] Verify operational details against source: native CLI env loading/fallback, key encodings/current Bunny verification, failed-policy revision recovery, E2E prerequisites, production HSTS, and update/backup boundaries.
+- [x] Validate README links/commands/template-key coverage and GitHub rendering; all 10 expandable helpers and 9 navigation pairs retained.
+- [x] Rerun types/lint, 81 offline and 19 production browser/API tests without rebuilding/restarting the unchanged preview. Keep live-provider acceptance explicitly pending.

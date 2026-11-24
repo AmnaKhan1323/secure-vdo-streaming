@@ -2,6 +2,14 @@
 
 Verified on **2026-11-24** in the original Windows workspace.
 
+## Handover documentation review — current update
+
+- Expanded the README into a receiver-facing guide while keeping deeper sections expandable: scope/status, first run, both-provider setup, all 17 template variables, security/architecture, source/API map, testing evidence, native deployment, backup/ownership/license responsibilities, troubleshooting/FAQ, and acceptance checklist.
+- Cross-checked the guidance against source. Clarified Prisma/seed environment loading and the migration localhost fallback, Gumlet encoding inheritance, provider revision reload/recovery, the current Bunny key comparison, E2E browser/build prerequisites, and production HSTS implications. No live credentials or provider settings were modified.
+- Automated documentation checks verified relative file/heading links, documented npm script names, coverage of every template variable, and balanced expandable markup. GitHub's Markdown renderer retained **10 expandable helpers and 9 navigation heading/link pairs**.
+- Strict TypeScript, zero-warning lint, **81 offline tests and 19 production Edge browser/API tests passed again**. The unchanged production build was reused; this documentation-only update did not rebuild/restart the preview or alter its data.
+- Four previously skipped live checks remain deferred; no new real-provider/media, native PostgreSQL, or production certification is claimed. No project license was invented; the recipient is told to confirm terms and access ownership privately.
+
 ## Generic vdo platform wording — current update
 
 - Replaced target-website names, URLs, and public default domains throughout the current app, README, guides, instructions, and tests with **vdo platform** wording. A full tracked-file scan found no old target-name references. Existing Git history and stored IDs were not rewritten.
