@@ -2,6 +2,15 @@
 
 Verified on **2026-11-24** in the original Windows workspace.
 
+## CodeWithHarry video test — deferred by the user
+
+- Checked development and production configuration by **presence only**: all seven provider key/scope values and both live asset IDs are missing. No private local environment file is configured; the running local database contains **0 Gumlet and 0 Bunny mappings**. No values or bearer URLs were printed.
+- Attempted the credential-gated live suite: **0 passed, 4 explicitly skipped**. Real CodeWithHarry media playback, expiry, domain restrictions, and CDN enforcement have **not** been tested.
+- The public homepage and [terms](https://www.codewithharry.com/terms) were reviewed, not used as playback evidence. The terms require consent for copying/sharing; no third-party video was downloaded, imported, or rehosted.
+- The user selected **update the README now; do the live test later**. That future test requires authorized media, private provider configuration, and the same video's real IDs in both providers.
+- Re-ran unchanged application checks: **81 offline and 18 production Edge browser/API tests passed**, strict TypeScript and zero-warning lint passed. These results establish code/application behavior, not successful playback of CodeWithHarry videos. The existing production build was reused; no concurrent build disrupted the running preview.
+- README shortened into clickable sections, six easy steps, three expandable helpers, and a clear remaining-work checklist. Provider details and live browser acceptance remain in the linked guides.
+
 ## Minimal scope verification — current release
 
 The latest app contains only the secure-streaming test workflow for codewithharry.com course videos: login/signup, inline test enrollment, both actual Gumlet/Bunny players, signed playback/protection checks, expiry/access probes, saved observations, and essential admin policy/manual ID linking.

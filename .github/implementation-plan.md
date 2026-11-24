@@ -104,3 +104,12 @@ User requested all actionable remaining work; keep the prototype small and never
 - [x] Bootstrap only two text-only test containers on a fresh database, not full web/Python/DSA curricula. Existing data is never overwritten or deleted.
 - [x] Validate retained security and minimal workflows, update the short interactive README, and safely restart the same preview. All eight aggregate record counts match the pre-restart baseline; the same signed-in session still authenticates.
 - [x] Publish reviewed minimal source and separately observe the new GitHub CI run — implementation 503370c pushed without force; run 45403044863 completed successfully.
+
+## CodeWithHarry video test and simpler README
+
+- [x] Check credential/asset presence without exposing values: development/production keys and live IDs missing; zero mappings in both local provider slots.
+- [x] Attempt live tests honestly — all four skipped. Re-run 81 offline + 18 production browser/API tests, types, and zero-warning lint successfully.
+- [x] Review public CodeWithHarry terms; do not download/rehost its videos without consent or treat homepage access as playback evidence.
+- [x] User chose README updates now and live testing later; keep that boundary explicit.
+- [x] Make the README shorter, clickable, expandable, and easy to follow; include private setup, real IDs, and remaining-user steps.
+- [ ] Test actual authorized CodeWithHarry media on both providers after the user supplies private configuration/assets; follow the browser/CDN acceptance checklist.

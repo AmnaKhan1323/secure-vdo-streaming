@@ -1,14 +1,14 @@
 # Secure VDO Streaming
 
-A small **Next.js + TypeScript** prototype to compare secure course videos on **Gumlet and Bunny Stream**. Real APIs, server-signed playback, enrollment checks, and honest browser measurements—not a new LMS.
+A small **Next.js** app to test the same course video on **Gumlet and Bunny Stream**, with login, enrollment checks, and short-lived playback links.
 
-[Start locally](#quick-start) · [Use the app](#use-the-app) · [Your remaining steps](#your-remaining-steps) · [Full setup](docs/setup.md) · [Test evidence](docs/verification.md) · [CI](https://github.com/AmnaKhan1323/secure-vdo-streaming/actions)
+[Start](#start) · [Test a video](#test-a-codewithharry-video) · [Still needed](#still-needed) · [Full guide](docs/setup.md) · [Test results](docs/verification.md)
 
-> **Prototype code is implemented. Live playback needs your provider credentials and authorized videos.** No fake streams, default accounts, or production certification.
+> **Prototype ready. Real CodeWithHarry playback is not yet verified.** Live testing needs your provider keys and an authorized video. A course/YouTube link is not a provider video ID.
 
-## Quick start
+## Start
 
-Install **Node 22.12+** (24 recommended), then run in this project folder:
+Install **Node 22.12+** (24 recommended). Run in this project folder:
 
 ```powershell
 npm.cmd install
@@ -16,55 +16,48 @@ npm.cmd run db:generate
 npm.cmd run dev:local
 ```
 
-Open **[localhost:3000/signup](http://localhost:3000/signup)**. No Docker needed. On macOS/Linux, use `npm` instead of `npm.cmd`. Keep `DATABASE_URL` empty for this local mode; private database/session data stay in the ignored **.local** folder.
+Open **[localhost:3000/signup](http://localhost:3000/signup)**. No Docker needed. On macOS/Linux, use `npm` instead of `npm.cmd`.
 
-## Use the app
+## Test a CodeWithHarry video
 
-1. **Sign up** with a password of at least 12 characters.
-2. **Enable admin access** for that existing account—expand the instructions below.
-3. **Configure both providers** privately and enable token/domain protection.
-4. **Upload the same authorized video in each provider's console**, then link both real IDs to one lesson in **Provider setup**.
-5. **Enroll using Course access** on the comparison screen—even admins must enroll.
-6. Open **Video comparison → Run both providers**. Play each iframe; expand **Saved test runs** for stored results.
+1. Get a video you have **permission to upload/use**—see [CodeWithHarry's terms](https://www.codewithharry.com/terms).
+2. **Sign up** (12-character minimum password), then enable admin access below.
+3. **Add both providers' private keys** using the instructions below; restart the app.
+4. Upload the **same authorized file** to both provider consoles (or use existing authorized assets); wait for processing.
+5. In **Provider setup**, save/check protection and link both real video IDs to the **same lesson**.
+6. In **Course access**, enroll—even admins must. Click **Run both providers**, play each video, and open **Saved test runs**.
 
 <details>
-<summary><strong>🔑 Enable admin access</strong></summary>
+<summary><strong>Enable admin access</strong></summary>
 
-Keep the app running. In a second terminal, use your signup email:
+Keep the app running. In a second terminal, replace the email with your signup email:
 
 ```powershell
 npm.cmd run admin:promote -- --local --email your-email@example.com
 ```
 
-Refresh the browser to see **Provider setup**. This command creates no new account/password.
-
+Refresh the browser. No default account or password is created.
 </details>
 
 <details>
-<summary><strong>⚙️ Connect Gumlet and Bunny</strong></summary>
+<summary><strong>Add private keys and protect the videos</strong></summary>
 
-Create **.env.local** in your editor using [the template](.env.example). For `dev:local`, leave database/password/auth-secret values empty; keep `BETTER_AUTH_URL=http://localhost:3000`.
+Create **.env.local** in your editor from [the template](.env.example). For local mode, leave `DATABASE_URL`, `POSTGRES_PASSWORD`, and `BETTER_AUTH_SECRET` empty; keep `BETTER_AUTH_URL=http://localhost:3000`.
 
-| Provider | Private server variables |
+| Provider | Required values |
 | --- | --- |
 | Gumlet | `GUMLET_API_KEY`, `GUMLET_WORKSPACE_ID`, `GUMLET_SIGNING_SECRET` |
 | Bunny | `BUNNY_STREAM_API_KEY`, `BUNNY_LIBRARY_ID`, `BUNNY_TOKEN_AUTH_KEY`, `BUNNY_CORE_API_KEY` |
 
-Restart after changing values. Enable **signed/embed + media/CDN tokens**, allow the actual hostname, and disable MP4/original/download bypasses. In **Provider setup**, save/check policy and link both videos. Failed updates stay disabled until recovery.
+Also set `LIVE_GUMLET_ASSET_ID` and `LIVE_BUNNY_VIDEO_ID` to those same real videos for automated live checks.
 
-**Never upload secrets or paste them into the UI/chat.** See [exact provider steps, key encodings, and recovery](docs/setup.md).
-
+Enable signed/embed **and media/CDN protection**, allow your app's hostname, and disable downloads/MP4/original bypasses. Follow [exact provider settings](docs/setup.md). **Never commit keys or paste them into chat.**
 </details>
 
 <details>
-<summary><strong>🧪 Test and read the results</strong></summary>
+<summary><strong>Run checks and understand results</strong></summary>
 
-- Test **without a session/enrollment**; both application paths must deny access.
-- Admins can test **60-second, expired, and tampered tokens**.
-- Iframe load and SDK ready are **not** playback success. Advancing media time is a browser observation, not an exact first-frame benchmark.
-- App expiry is **not** proof of provider/CDN rejection. Tests record observations only and never change stored learner progress.
-
-Stop a dev server before building, then run:
+Stop the dev/preview server before these build checks:
 
 ```powershell
 npm.cmd run check
@@ -72,20 +65,13 @@ npm.cmd run test:e2e
 npm.cmd run test:live
 ```
 
-Live tests skip without credentials/assets. See [browser acceptance checks](docs/testing.md) and [verification results](docs/verification.md).
-
+Live checks **skip** without keys/videos; they are not playback proof. Use the app to test denied access and admin-only short/expired/tampered tokens. Loading, HTTP 200, or a countdown is not a security pass: verify real playback and provider rejection using [this checklist](docs/testing.md).
 </details>
 
-## Your remaining steps
+## Still needed
 
-- [ ] Supply **your own Gumlet/Bunny accounts, private keys, and authorized video**; encoding/bandwidth may cost money.
-- [ ] Verify real playback, expired/tampered tokens, wrong domains, and unsigned **manifests + segments** in actual browsers.
-- [ ] Before production, connect real website entitlements and configure **HTTPS, native PostgreSQL, recovery/MFA, backups, and monitoring**.
+- [ ] Your provider accounts/keys and the same **authorized CodeWithHarry video** on both providers; usage may cost money.
+- [ ] Real-browser playback, expired/tampered-token, wrong-domain, and unsigned manifest/segment checks.
+- [ ] For production: authorized website login/entitlement integration, HTTPS, native PostgreSQL, and operational safeguards—see [the guide](docs/setup.md).
 
-Originally intended to evaluate codewithharry.com videos; **no official account/catalog/media integration is included**. Signed URLs are not DRM, existing URLs last until provider expiry, and authorized screen recording cannot be prevented completely. **GitHub upload is not deployment.**
-
-**Kept small:** one comparison screen + essential provider setup. Course marketing/search/curriculum pages, progress tracking, URL imports, and catalog browsing have been removed. Existing data is preserved; old course links return to the test bench. A fresh database contains two text-only playback/access test containers, not full courses or videos.
-
-**Stack:** Next.js App Router · Tailwind · Better Auth · PostgreSQL/Prisma 7.
-
-**References:** [Gumlet protection](https://docs.gumlet.com/video/manage-videos/video-protection-settings-section#signed-url) · [Bunny tokens](https://bunny.net/docs/stream/token-authentication.md) · [Detailed setup](docs/setup.md)
+**No official CodeWithHarry account/media integration, fake streams, or DRM.** Existing data is preserved. GitHub upload is not deployment or live verification. [CI](https://github.com/AmnaKhan1323/secure-vdo-streaming/actions)

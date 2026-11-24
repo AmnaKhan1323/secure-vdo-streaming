@@ -23,6 +23,8 @@ The authentication/enrollment probe buttons call **both provider paths** and acc
 
 Configure server environment variables privately as described in the README. No API key input is accepted through the frontend. Set the optional live asset IDs to real, processed assets in the configured workspace/library. Tests are read-only and skip with an explicit reason when configuration is absent.
 
+For a **CodeWithHarry video test**, use a creator-authorized file or assets you are permitted to use. [Its terms](https://www.codewithharry.com/terms) prohibit reproduction/distribution/sharing without consent; public/free viewing does not automatically grant re-upload permission. A website or YouTube URL is not a Gumlet asset ID or Bunny video GUID, and this prototype does not scrape/import third-party videos. Upload the same authorized file into both configured scopes, link both IDs to one lesson, and set `LIVE_GUMLET_ASSET_ID` / `LIVE_BUNNY_VIDEO_ID` privately to those assets. Do not record a CodeWithHarry playback pass until that actual media has passed the browser checks below.
+
 1. Choose a controlled test scope. Review consequences before enabling shared token protection.
 2. Configure the same media file on both providers; record codec/resolution/duration differences.
 3. Enable strict allowed domains, embed signing, media/CDN protection, and disable downloadable/original/MP4 bypasses.

@@ -17,6 +17,7 @@
 - [x] Published reviewed source to public AmnaKhan1323/secure-vdo-streaming, preserving the starter commit; private files excluded. GitHub Actions verification passed for implementation commit 15ddf16.
 - [x] Trimmed to the minimal comparator: removed LMS pages/progress, URL imports/catalog, and duplicate admin player. Retained both providers and secure access; validated 81 offline + 18 production browser/API tests, build/types/lint/audit. Live provider checks remain credential-gated.
 - [x] Published the minimal implementation as 503370c; GitHub Actions Verify prototype run 45403044863 passed on Ubuntu/Node 24. Same-data preview/session preserved; all 72 staged paths reviewed and private artifacts excluded.
+- [x] Rechecked CodeWithHarry live prerequisites: keys/live IDs/mappings missing; four live checks skipped, 81 offline + 18 browser/API tests/types/lint passed again. User chose a shorter interactive README now and live testing later; no third-party video was copied or successful live playback claimed.
 
 ## Development rules
 
