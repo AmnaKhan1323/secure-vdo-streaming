@@ -1,0 +1,189 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Provider {
+  GUMLET
+  BUNNY
+}
+
+model User {
+  id            String   @id
+  name          String
+  email         String   @unique
+  emailVerified Boolean  @default(false)
+  image         String?
+  role          String   @default("STUDENT")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  sessions      Session[]
+  accounts      Account[]
+  enrollments   Enrollment[]
+  progress      LessonProgress[]
+  attempts      PlaybackAttempt[]
+}
+
+model Session {
+  id        String   @id
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@index([userId])
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@index([userId])
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  @@index([identifier])
+}
+
+model RateLimit {
+  id          String @id
+  key         String @unique
+  count       Int
+  lastRequest BigInt
+}
+
+model ApiRateLimit {
+  key       String   @id
+  count     Int      @default(1)
+  expiresAt DateTime
+  @@index([expiresAt])
+}
+
+model Course {
+  id               String   @id @default(cuid())
+  slug             String   @unique
+  title            String
+  subtitle         String
+  description      String
+  category         String
+  level            String
+  accent           String   @default("violet")
+  instructor       String
+  instructorRole   String
+  learningOutcomes String[]
+  published        Boolean  @default(true)
+  openEnrollment   Boolean  @default(true)
+  createdAt        DateTime @default(now())
+  lessons          Lesson[]
+  enrollments      Enrollment[]
+}
+
+model Lesson {
+  id               String   @id @default(cuid())
+  courseId         String
+  title            String
+  description      String
+  module           String
+  position         Int
+  estimatedSeconds Int
+  course           Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  videos           LessonVideo[]
+  progress         LessonProgress[]
+  attempts         PlaybackAttempt[]
+  @@unique([courseId, position])
+}
+
+model LessonVideo {
+  id        String   @id @default(cuid())
+  lessonId  String
+  provider  Provider
+  assetId   String
+  updatedAt DateTime @updatedAt
+  lesson    Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  @@unique([lessonId, provider])
+}
+
+model Enrollment {
+  id        String   @id @default(cuid())
+  userId    String
+  courseId  String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  @@unique([userId, courseId])
+}
+
+model LessonProgress {
+  id             String    @id @default(cuid())
+  userId         String
+  lessonId       String
+  positionSeconds Float    @default(0)
+  durationSeconds Float    @default(0)
+  percent        Float     @default(0)
+  completed      Boolean   @default(false)
+  completedAt    DateTime?
+  playbackAttemptId String?
+  playbackStartedAt DateTime?
+  sequence       Int       @default(0)
+  updatedAt      DateTime  @updatedAt
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lesson         Lesson    @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  @@unique([userId, lessonId])
+}
+
+model ProviderSetting {
+  provider       Provider @id
+  enabled        Boolean  @default(false)
+  ttlSeconds     Int      @default(300)
+  allowedDomains String[] @default([])
+  updatedAt      DateTime @updatedAt
+}
+
+model PlaybackAttempt {
+  id              String   @id @default(uuid())
+  userId          String
+  lessonId        String
+  provider        Provider
+  assetId         String?
+  assetMappedAt   DateTime?
+  purpose         String   @default("lesson")
+  mode            String   @default("standard")
+  outcome         String   @default("issued")
+  issuanceMs      Float
+  durationSeconds Float
+  tokenRequestMs  Float?
+  iframeLoadMs    Float?
+  readyMs         Float?
+  firstFrameMs    Float?
+  errorCode       String?
+  expiresAt       DateTime
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lesson          Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  @@index([userId, createdAt])
+}
