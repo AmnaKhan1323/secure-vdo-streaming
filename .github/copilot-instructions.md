@@ -16,6 +16,7 @@
 - [x] Renamed product to Secure VDO Streaming, wrote easy usage/gaps documentation, and completed pending hardening: 77 offline + 16 E2E tests, strict types/lint/build, clean audit; four live checks remain skipped without credentials.
 - [x] Published reviewed source to public AmnaKhan1323/secure-vdo-streaming, preserving the starter commit; private files excluded. GitHub Actions verification passed for implementation commit 15ddf16.
 - [x] Trimmed to the minimal comparator: removed LMS pages/progress, URL imports/catalog, and duplicate admin player. Retained both providers and secure access; validated 81 offline + 18 production browser/API tests, build/types/lint/audit. Live provider checks remain credential-gated.
+- [x] Published the minimal implementation as 503370c; GitHub Actions Verify prototype run 45403044863 passed on Ubuntu/Node 24. Same-data preview/session preserved; all 72 staged paths reviewed and private artifacts excluded.
 
 ## Development rules
 

@@ -16,6 +16,8 @@ The latest app contains only the secure-streaming test workflow for codewithharr
 - Live provider checks: **4 explicitly skipped** without private credentials/assets. No live playback, CDN, domain, or expiry acceptance is claimed.
 - Same-data production preview restarted at http://localhost:3000/dashboard after an ignored private backup. All eight aggregate counts matched the pre-restart baseline (1 user, 1 session, 3 courses, 13 lessons; enrollment/progress/mapping/attempt counts remain zero). The existing session still authenticates; no extra courses, accounts, roles, or enrollments were created.
 - The README is short, clickable, and expandable; exact provider instructions and remaining operator requirements are in [setup.md](setup.md) and [testing.md](testing.md).
+- Published the reviewed minimal implementation as [503370c](https://github.com/AmnaKhan1323/secure-vdo-streaming/commit/503370cb3ed9ddba6b685c5035913e2b4804cb93), without force or history replacement. All 72 staged paths were reviewed; the 59 non-deleted staged files passed the private-value/artifact scan. Private local data/config, generated code, dependencies, test outputs, and unrelated files were excluded.
+- GitHub Actions [Verify prototype run 45403044863](https://github.com/AmnaKhan1323/secure-vdo-streaming/actions/runs/45403044863) **completed successfully for 503370c**, independently of the older release runs: clean install, types, lint, offline tests, production build, Chromium browser/API tests, and audit on Ubuntu/Node 24 without provider secrets.
 
 Earlier counts and learning-platform features below describe historical releases, not the current scope.
 

@@ -94,7 +94,7 @@ User requested all actionable remaining work; keep the prototype small and never
 - [x] Clear stale provider reports on edits, reconcile refreshed mapping displays, and close local database resources on startup failure.
 - [x] Replace the long README with a short clickable quick start, expandable setup/checks, and a clear remaining-user checklist; retain technical details in docs.
 - [x] Add regression tests and rerun local build/types/lint/offline/browser/audit checks — 81 offline + 18 E2E passed; publication/preservation tracked below.
-- [ ] Observe GitHub CI separately; do not confuse code completion with credentialed provider/production acceptance.
+- [x] Observe GitHub CI separately — minimal implementation 503370c passed Verify prototype run 45403044863. Do not confuse code completion with credentialed provider/production acceptance.
 
 ## Latest request: remove nonessential functionality
 
@@ -103,4 +103,4 @@ User requested all actionable remaining work; keep the prototype small and never
 - [x] Put compact course-enrollment controls on the comparison screen. Keep old course URLs as redirects; preserve all existing database records and identities.
 - [x] Bootstrap only two text-only test containers on a fresh database, not full web/Python/DSA curricula. Existing data is never overwritten or deleted.
 - [x] Validate retained security and minimal workflows, update the short interactive README, and safely restart the same preview. All eight aggregate record counts match the pre-restart baseline; the same signed-in session still authenticates.
-- [ ] Publish reviewed minimal source and separately observe the new GitHub CI run.
+- [x] Publish reviewed minimal source and separately observe the new GitHub CI run — implementation 503370c pushed without force; run 45403044863 completed successfully.
